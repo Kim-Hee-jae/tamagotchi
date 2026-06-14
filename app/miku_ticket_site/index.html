@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#18b7ae">
+    <title>HATSUNE MIKU VIRTUAL LIVE</title>
+    <style>
+      :root {
+        --ink: #102120;
+        --paper: #fffef8;
+        --teal: #16b4ad;
+        --deep: #0f5451;
+        --pink: #ef5b83;
+        --soft: #dff8f4;
+        --line: #103a38;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+        margin: 0;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+        padding: 22px;
+        background:
+          linear-gradient(160deg, rgba(22, 180, 173, 0.2), transparent 40%),
+          linear-gradient(25deg, rgba(239, 91, 131, 0.14), transparent 52%),
+          #f8fbf8;
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        letter-spacing: 0;
+      }
+
+      .wrap {
+        width: min(100%, 860px);
+        display: grid;
+        gap: 18px;
+      }
+
+      .ticket {
+        min-height: 320px;
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) 18px minmax(180px, 0.75fr);
+        border: 3px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--paper);
+        box-shadow: 0 22px 60px rgba(10, 82, 78, 0.22);
+      }
+
+      .main {
+        padding: clamp(18px, 4vw, 34px);
+        display: grid;
+        align-content: space-between;
+        gap: 22px;
+        position: relative;
+      }
+
+      .main::before {
+        content: "";
+        position: absolute;
+        inset: 12px;
+        border: 2px solid var(--teal);
+        border-radius: 4px;
+        pointer-events: none;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        color: var(--deep);
+        font-size: 0.76rem;
+        font-weight: 900;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 7vw, 4.8rem);
+        line-height: 0.92;
+        letter-spacing: 0;
+        max-width: 9ch;
+      }
+
+      .meta {
+        display: grid;
+        gap: 8px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: clamp(0.92rem, 2.5vw, 1.12rem);
+        font-weight: 800;
+      }
+
+      .meta-row {
+        display: grid;
+        grid-template-columns: 90px 1fr;
+        gap: 12px;
+      }
+
+      .stub {
+        border-left: 2px dashed var(--line);
+        border-right: 2px dashed var(--line);
+        background:
+          radial-gradient(circle at 50% 0, transparent 0 10px, var(--paper) 11px),
+          radial-gradient(circle at 50% 100%, transparent 0 10px, var(--paper) 11px),
+          repeating-linear-gradient(180deg, transparent 0 14px, rgba(16, 58, 56, 0.28) 14px 16px);
+      }
+
+      .poster {
+        padding: 18px;
+        background:
+          linear-gradient(160deg, rgba(22, 180, 173, 0.86), rgba(239, 91, 131, 0.64)),
+          #111;
+        display: grid;
+        align-content: space-between;
+        color: #fff;
+      }
+
+      .poster-mark {
+        min-height: 170px;
+        border: 2px solid rgba(255, 255, 255, 0.9);
+        display: grid;
+        place-items: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .poster-mark::before,
+      .poster-mark::after {
+        content: "";
+        position: absolute;
+        width: 95px;
+        height: 220px;
+        background: rgba(255, 255, 255, 0.38);
+        transform: rotate(28deg);
+      }
+
+      .poster-mark::before {
+        left: 24px;
+        top: -18px;
+      }
+
+      .poster-mark::after {
+        right: 10px;
+        top: 36px;
+        background: rgba(16, 33, 32, 0.24);
+      }
+
+      .poster-mark span {
+        z-index: 1;
+        font-size: 3.8rem;
+        font-weight: 950;
+      }
+
+      .barcode {
+        height: 70px;
+        border: 2px solid rgba(255, 255, 255, 0.85);
+        background:
+          repeating-linear-gradient(90deg, #fff 0 3px, transparent 3px 7px, #fff 7px 9px, transparent 9px 16px);
+      }
+
+      .ticket-no {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.86rem;
+        font-weight: 900;
+      }
+
+      .enter {
+        width: min(100%, 340px);
+        justify-self: center;
+        min-height: 52px;
+        border: 3px solid var(--line);
+        border-radius: 8px;
+        background: var(--ink);
+        color: #fff;
+        font-weight: 900;
+        font-size: 1rem;
+        box-shadow: 0 6px 0 var(--line);
+        cursor: pointer;
+      }
+
+      .enter:active {
+        transform: translateY(4px);
+        box-shadow: 0 2px 0 var(--line);
+      }
+
+      @media (max-width: 680px) {
+        body {
+          padding: 16px;
+        }
+
+        .ticket {
+          grid-template-columns: 1fr;
+        }
+
+        .stub {
+          height: 18px;
+          border-left: 0;
+          border-right: 0;
+          border-top: 2px dashed var(--line);
+          border-bottom: 2px dashed var(--line);
+          background: repeating-linear-gradient(90deg, transparent 0 14px, rgba(16, 58, 56, 0.28) 14px 16px);
+        }
+
+        .poster {
+          min-height: 210px;
+          grid-template-columns: 1fr 110px;
+          gap: 14px;
+        }
+
+        .poster-mark {
+          min-height: 130px;
+        }
+
+        .barcode {
+          height: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="ticket" aria-label="Miku concert ticket">
+        <div class="main">
+          <div>
+            <p class="eyebrow">VIRTUAL ADMISSION</p>
+            <h1 id="ticketTitle">HATSUNE MIKU VIRTUAL LIVE</h1>
+          </div>
+          <div class="meta" id="ticketMeta"></div>
+        </div>
+        <div class="stub" aria-hidden="true"></div>
+        <aside class="poster">
+          <div class="poster-mark"><span>39</span></div>
+          <div>
+            <div class="barcode" aria-hidden="true"></div>
+            <p class="ticket-no" id="ticketNo">TICKET NO. MM-0615-0039</p>
+          </div>
+        </aside>
+      </section>
+      <button class="enter" id="enterButton" type="button">총괄 페이지에서 입장</button>
+    </main>
+
+    <script>
+      const MAIN_PWA_URL = "https://tamagotchi68.netlify.app";
+      const CONFIG = {
+        title: "HATSUNE MIKU VIRTUAL LIVE",
+        date: "2026.06.15",
+        gate: "HALL III",
+        seat: "VIRTUAL AREA 39",
+        status: "ADMITTED",
+        ticketNo: "MM-0615-0039"
+      };
+
+      document.getElementById("ticketTitle").textContent = CONFIG.title;
+      document.getElementById("ticketMeta").innerHTML = [
+        ["DATE", CONFIG.date],
+        ["GATE", CONFIG.gate],
+        ["SEAT", CONFIG.seat],
+        ["STATUS", CONFIG.status]
+      ].map(([label, value]) => `<div class="meta-row"><span>${label}</span><span>${value}</span></div>`).join("");
+      document.getElementById("ticketNo").textContent = `TICKET NO. ${CONFIG.ticketNo}`;
+      document.getElementById("enterButton").addEventListener("click", () => {
+        window.location.href = `${MAIN_PWA_URL}?mode=miku`;
+      });
+    </script>
+  </body>
+</html>

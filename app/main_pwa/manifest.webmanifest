@@ -1,0 +1,25 @@
+{
+  "name": "가짜에게 진심이 되는 순간",
+  "short_name": "진심의 순간",
+  "description": "가상 존재와 애착의 조건을 걷듯 체험하는 전시형 PWA",
+  "start_url": "/?reset=1",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff8ea",
+  "theme_color": "#23a6a0",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='36' fill='%2323a6a0'/%3E%3Cpath d='M49 50h94v92H49z' fill='%23fff8ea'/%3E%3Cpath d='M66 72h60v42H66z' fill='%23dce8bc' stroke='%23182525' stroke-width='8'/%3E%3Cpath d='M82 88h28v22H82z' fill='%23182525'/%3E%3Ccircle cx='78' cy='136' r='10' fill='%23f06c55'/%3E%3Ccircle cx='96' cy='140' r='10' fill='%23f06c55'/%3E%3Ccircle cx='114' cy='136' r='10' fill='%23f06c55'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%2323a6a0'/%3E%3Cpath d='M132 132h248v248H132z' fill='%23fff8ea'/%3E%3Cpath d='M176 190h160v112H176z' fill='%23dce8bc' stroke='%23182525' stroke-width='22'/%3E%3Cpath d='M218 232h76v58h-76z' fill='%23182525'/%3E%3Ccircle cx='208' cy='360' r='27' fill='%23f06c55'/%3E%3Ccircle cx='256' cy='372' r='27' fill='%23f06c55'/%3E%3Ccircle cx='304' cy='360' r='27' fill='%23f06c55'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

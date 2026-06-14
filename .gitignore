@@ -1,0 +1,9 @@
+
+**/private_config.txt
+.env
+.env.*
+node_modules/
+dist/
+build/
+.cache/
+.netlify/

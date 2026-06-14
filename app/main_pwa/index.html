@@ -1,0 +1,2660 @@
+﻿<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#23a6a0">
+    <title>가짜에게 진심이 되는 순간</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <script src="/config.js"></script>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #fff8ea;
+        --paper: #fffdf7;
+        --ink: #182525;
+        --muted: #6b7472;
+        --line: #214947;
+        --teal: #1aa59c;
+        --mint: #bcefe2;
+        --coral: #f06c55;
+        --gold: #f0b840;
+        --lcd: #dce8bc;
+        --lcd-dark: #243023;
+        --shadow: 0 18px 46px rgba(19, 55, 52, 0.18);
+        --radius: 8px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+        margin: 0;
+      }
+
+      body {
+        background:
+          linear-gradient(180deg, rgba(26, 165, 156, 0.16), transparent 280px),
+          radial-gradient(circle at 20% 12%, rgba(240, 184, 64, 0.18), transparent 160px),
+          var(--bg);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        letter-spacing: 0;
+        overflow-x: hidden;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button {
+        border: 0;
+        cursor: pointer;
+      }
+
+      .app-shell {
+        width: min(100%, 460px);
+        min-height: 100dvh;
+        margin: 0 auto;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        position: relative;
+        background: rgba(255, 253, 247, 0.62);
+        border-left: 1px solid rgba(33, 73, 71, 0.1);
+        border-right: 1px solid rgba(33, 73, 71, 0.1);
+      }
+
+      .app-shell.rupture {
+        --bg: #f4f4f1;
+        --paper: #ffffff;
+        --ink: #111;
+        --muted: #777;
+        --line: #181818;
+        --teal: #2d2d2d;
+        --mint: #e8e8e8;
+        --coral: #111;
+        --gold: #bebebe;
+        --lcd: #eef0ea;
+        --lcd-dark: #151515;
+        background:
+          repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.035) 0 1px, transparent 1px 7px),
+          #f7f7f5;
+      }
+
+      .app-shell.rupture.visual-normal-hall2 {
+        --bg: #fff8ea;
+        --paper: #fffdf7;
+        --ink: #182525;
+        --muted: #6b7472;
+        --line: #214947;
+        --teal: #1aa59c;
+        --mint: #bcefe2;
+        --coral: #f06c55;
+        --gold: #f0b840;
+        --lcd: #dce8bc;
+        --lcd-dark: #243023;
+        background:
+          linear-gradient(180deg, rgba(26, 165, 156, 0.16), transparent 280px),
+          radial-gradient(circle at 20% 12%, rgba(240, 184, 64, 0.18), transparent 160px),
+          var(--bg);
+      }
+
+      .topbar {
+        padding: max(16px, env(safe-area-inset-top)) 18px 12px;
+        border-bottom: 2px solid var(--line);
+        background: rgba(255, 253, 247, 0.88);
+        backdrop-filter: blur(16px);
+        position: sticky;
+        top: 0;
+        z-index: 5;
+      }
+
+      .rupture .topbar {
+        background: rgba(250, 250, 250, 0.9);
+        border-bottom-style: dashed;
+      }
+
+      .title-row {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 1.04rem;
+        line-height: 1.15;
+        letter-spacing: 0;
+      }
+
+      .phase-chip {
+        min-width: 72px;
+        padding: 6px 8px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--mint);
+        color: var(--ink);
+        text-align: center;
+        font-size: 0.72rem;
+        font-weight: 800;
+      }
+
+      .hall-kicker {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .stage {
+        padding: 16px;
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+      }
+
+      .hall {
+        width: 100%;
+        display: grid;
+        gap: 14px;
+        align-content: start;
+      }
+
+      .surface {
+        border: 2px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--paper);
+        box-shadow: var(--shadow);
+      }
+
+      .panel {
+        padding: 14px;
+      }
+
+      .panel-title {
+        margin: 0 0 8px;
+        font-size: 1rem;
+        line-height: 1.2;
+      }
+
+      .small-copy {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.86rem;
+        line-height: 1.45;
+      }
+
+      .nav {
+        padding: 12px 16px max(14px, env(safe-area-inset-bottom));
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 10px;
+        border-top: 2px solid var(--line);
+        background: rgba(255, 253, 247, 0.9);
+      }
+
+      .nav button,
+      .action-btn,
+      .icon-btn,
+      .chat-send {
+        min-height: 44px;
+        border: 2px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--ink);
+        color: #fff;
+        font-weight: 800;
+        box-shadow: 0 4px 0 var(--line);
+      }
+
+      .nav button:active,
+      .action-btn:active,
+      .icon-btn:active,
+      .chat-send:active {
+        transform: translateY(3px);
+        box-shadow: 0 1px 0 var(--line);
+      }
+
+      .secondary {
+        background: var(--paper);
+        color: var(--ink);
+      }
+
+      .danger {
+        background: var(--coral);
+        color: #fff;
+      }
+
+      .ghost-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      .device-wrap {
+        display: grid;
+        justify-items: center;
+        gap: 12px;
+      }
+
+      .tama-device {
+        width: min(100%, 330px);
+        aspect-ratio: 0.78;
+        padding: 30px 24px 24px;
+        border: 3px solid #17403d;
+        border-radius: 48% 48% 44% 44% / 54% 54% 42% 42%;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.5), transparent 38%),
+          var(--mint);
+        box-shadow: inset 0 -12px 0 rgba(0, 0, 0, 0.08), 0 18px 34px rgba(8, 70, 65, 0.24);
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 14px;
+        position: relative;
+      }
+
+      .tama-device::before {
+        content: "";
+        width: 34px;
+        height: 14px;
+        border: 3px solid #17403d;
+        border-bottom: 0;
+        border-radius: 24px 24px 0 0;
+        position: absolute;
+        top: -12px;
+        left: calc(50% - 17px);
+        background: var(--gold);
+      }
+
+      .lcd {
+        border: 4px solid var(--lcd-dark);
+        border-radius: 6px;
+        background:
+          linear-gradient(rgba(36, 48, 35, 0.09) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(36, 48, 35, 0.07) 1px, transparent 1px),
+          var(--lcd);
+        background-size: 10px 10px;
+        padding: 10px;
+        min-height: 168px;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 8px;
+        color: var(--lcd-dark);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+
+      .lcd-top,
+      .lcd-bottom {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 0.72rem;
+        font-weight: 900;
+      }
+
+      .pixel-stage {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        place-items: center;
+        min-height: 70px;
+      }
+
+      .pixel-being {
+        width: 82px;
+        height: 66px;
+        position: relative;
+        image-rendering: pixelated;
+      }
+
+      .pixel-being::before {
+        content: "";
+        position: absolute;
+        inset: 10px 10px 8px;
+        background: var(--lcd-dark);
+        clip-path: polygon(18% 20%, 82% 20%, 82% 74%, 68% 74%, 68% 92%, 52% 92%, 52% 74%, 34% 74%, 34% 92%, 18% 92%);
+      }
+
+      .pixel-being::after {
+        content: "";
+        position: absolute;
+        left: 28px;
+        top: 30px;
+        width: 8px;
+        height: 8px;
+        background: var(--lcd);
+        box-shadow: 24px 0 0 var(--lcd);
+      }
+
+      .pixel-being.happy::before {
+        clip-path: polygon(18% 22%, 82% 22%, 82% 72%, 70% 72%, 70% 88%, 54% 88%, 54% 72%, 34% 72%, 34% 88%, 18% 88%);
+      }
+
+      .pixel-being.happy::after {
+        left: 24px;
+        top: 28px;
+        width: 8px;
+        height: 8px;
+        background: var(--lcd);
+        box-shadow:
+          28px 0 0 var(--lcd),
+          8px 20px 0 -2px var(--lcd),
+          16px 24px 0 -2px var(--lcd),
+          24px 20px 0 -2px var(--lcd);
+      }
+
+      .pixel-being.angry::before {
+        clip-path: polygon(16% 24%, 82% 18%, 86% 72%, 70% 72%, 70% 88%, 54% 88%, 54% 72%, 34% 72%, 34% 88%, 18% 88%);
+      }
+
+      .pixel-being.angry::after {
+        left: 22px;
+        top: 28px;
+        width: 20px;
+        height: 5px;
+        background: var(--lcd);
+        transform: rotate(18deg);
+        box-shadow:
+          30px -9px 0 var(--lcd),
+          18px 24px 0 -1px var(--lcd);
+      }
+
+      .pixel-poop {
+        width: 34px;
+        height: 30px;
+        position: relative;
+        image-rendering: pixelated;
+      }
+
+      .pixel-poop::before {
+        content: "";
+        position: absolute;
+        left: 5px;
+        bottom: 3px;
+        width: 24px;
+        height: 10px;
+        background: var(--lcd-dark);
+        box-shadow:
+          4px -8px 0 -1px var(--lcd-dark),
+          9px -15px 0 -2px var(--lcd-dark),
+          15px -20px 0 -4px var(--lcd-dark);
+      }
+
+      .pixel-poop::after {
+        content: "";
+        position: absolute;
+        left: 11px;
+        bottom: 8px;
+        width: 4px;
+        height: 4px;
+        background: var(--lcd);
+        box-shadow: 9px 0 0 var(--lcd);
+      }
+
+      .silent .pixel-being::before {
+        opacity: 0.18;
+        clip-path: polygon(15% 40%, 85% 40%, 85% 62%, 15% 62%);
+      }
+
+      .tama-speech {
+        min-height: 30px;
+        border: 2px solid var(--lcd-dark);
+        background: rgba(255, 255, 255, 0.22);
+        display: grid;
+        place-items: center;
+        padding: 4px 6px;
+        font-size: 0.84rem;
+        font-weight: 950;
+        text-align: center;
+      }
+
+      .tama-speech.success {
+        background: rgba(255, 255, 255, 0.42);
+      }
+
+      .tama-speech.wrong {
+        background: rgba(255, 230, 220, 0.48);
+      }
+
+      .status-bars {
+        display: grid;
+        gap: 5px;
+      }
+
+      .bar-row {
+        display: grid;
+        grid-template-columns: 64px 1fr;
+        align-items: center;
+        gap: 8px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.72rem;
+        font-weight: 900;
+      }
+
+      .bar {
+        height: 10px;
+        border: 2px solid var(--lcd-dark);
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 2px;
+        padding: 1px;
+      }
+
+      .bar span {
+        background: var(--lcd-dark);
+        opacity: 0.18;
+      }
+
+      .bar span.on {
+        opacity: 1;
+      }
+
+      .icon-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
+      }
+
+      .tama-icon {
+        min-height: 36px;
+        border: 2px solid #17403d;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.58);
+        color: #17403d;
+        display: grid;
+        place-items: center;
+        font-size: 0.56rem;
+        font-weight: 900;
+        text-align: center;
+      }
+
+      .tama-icon.selected {
+        background: var(--gold);
+        box-shadow: inset 0 0 0 2px #fff;
+      }
+
+      .abc-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        padding-inline: 24px;
+      }
+
+      .abc-row button {
+        aspect-ratio: 1;
+        border-radius: 50%;
+        border: 3px solid #17403d;
+        background: #ff7a6b;
+        color: #fff;
+        font-weight: 950;
+        box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.16);
+        display: grid;
+        place-items: center;
+        gap: 1px;
+        line-height: 1;
+        padding: 8px 4px 10px;
+      }
+
+      .abc-key {
+        font-size: 1.05rem;
+      }
+
+      .abc-label {
+        font-size: 0.63rem;
+        font-weight: 850;
+      }
+
+      .ticket-gate,
+      .notice-state {
+        min-height: 180px;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 26px 18px;
+      }
+
+      .miku-stage {
+        min-height: 360px;
+        overflow: hidden;
+        background: #050505;
+        position: relative;
+      }
+
+      .fullscreen-miku-active .topbar,
+      .fullscreen-miku-active .nav {
+        display: none;
+      }
+
+      .fullscreen-miku-active .stage {
+        padding: 0;
+      }
+
+      .fullscreen-miku {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        width: 100vw;
+        height: 100dvh;
+        background: #000;
+        overflow: hidden;
+      }
+
+      .fullscreen-miku .youtube-frame,
+      .youtube-frame.fullscreen {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        border-radius: 0;
+        aspect-ratio: auto;
+      }
+
+      .fullscreen-back-btn {
+        position: fixed;
+        top: max(12px, env(safe-area-inset-top));
+        left: max(12px, env(safe-area-inset-left));
+        z-index: 10001;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        background: rgba(0, 0, 0, 0.45);
+        color: #fff;
+        border-radius: 999px;
+        padding: 8px 11px;
+        font-size: 12px;
+        backdrop-filter: blur(8px);
+      }
+
+      .cheer-cloud {
+        min-height: 34px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .cheer-pill {
+        padding: 8px 10px;
+        border: 2px solid var(--line);
+        border-radius: 999px;
+        background: #e7fbf4;
+        font-weight: 900;
+        animation: floatUp 1.7s ease forwards;
+      }
+
+      @keyframes floatUp {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+        20% {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+      }
+
+      .youtube-frame {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        border: 2px solid var(--line);
+        border-radius: var(--radius);
+        background: #050505;
+      }
+
+      .youtube-frame.immersive {
+        min-height: min(68dvh, 620px);
+        height: min(68dvh, 620px);
+        aspect-ratio: auto;
+        border: 0;
+        border-radius: 0;
+      }
+
+      .youtube-frame.ordinary {
+        aspect-ratio: 16 / 9;
+      }
+
+      .youtube-frame iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        display: block;
+      }
+
+      .iframe-shield {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        background: transparent;
+      }
+
+      .iframe-shield.pan-lock {
+        bottom: 56px;
+      }
+
+      .sound-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        display: grid;
+        place-items: center;
+        padding: 18px;
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.42));
+        color: #fff;
+        text-align: center;
+        font-weight: 850;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.58);
+      }
+
+      .media-ready-copy {
+        text-align: center;
+        margin: 8px 18px 0;
+      }
+
+      .live-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 0.8rem;
+        font-weight: 800;
+      }
+
+      .live-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 8px;
+        border: 2px solid var(--line);
+        border-radius: 999px;
+        background: #fff3f0;
+        color: #b52020;
+      }
+
+      .chat-log {
+        height: 210px;
+        overflow: auto;
+        border: 2px solid var(--line);
+        border-radius: var(--radius);
+        background: #101411;
+        color: #eefbea;
+        padding: 10px;
+        display: grid;
+        align-content: end;
+        gap: 7px;
+        font-size: 0.82rem;
+      }
+
+      .chat-line {
+        line-height: 1.35;
+      }
+
+      .chat-line strong {
+        color: #90e7d2;
+      }
+
+      .chat-line.me strong {
+        color: #ffd36f;
+      }
+
+      .input-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+      }
+
+      .text-input {
+        min-height: 44px;
+        width: 100%;
+        border: 2px solid var(--line);
+        border-radius: var(--radius);
+        padding: 0 12px;
+        background: #fff;
+        color: var(--ink);
+      }
+
+      .chat-panel {
+        height: 380px;
+        overflow: auto;
+        padding: 12px;
+        border: 2px solid var(--line);
+        border-radius: var(--radius);
+        background:
+          linear-gradient(90deg, rgba(26, 165, 156, 0.06), transparent),
+          #fffef9;
+        display: grid;
+        align-content: end;
+        gap: 10px;
+      }
+
+      .hall4-meta {
+        display: grid;
+        gap: 4px;
+      }
+
+      .hall4-complete {
+        margin-top: 10px;
+      }
+
+      .suggestion-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .suggestion-row button {
+        min-height: 40px;
+        border: 2px solid var(--line);
+        border-radius: var(--radius);
+        background: #fffaf0;
+        color: var(--ink);
+        font: inherit;
+        font-size: 0.82rem;
+        text-align: left;
+        padding: 8px 10px;
+        cursor: pointer;
+      }
+
+      .suggestion-row button:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+
+      .message {
+        max-width: 88%;
+        padding: 10px 12px;
+        border: 2px solid var(--line);
+        border-radius: var(--radius);
+        background: #e9fbf5;
+        line-height: 1.42;
+        font-size: 0.9rem;
+      }
+
+      .message.user {
+        justify-self: end;
+        background: #fff2cf;
+      }
+
+      .message.system {
+        justify-self: center;
+        background: #f7f7f7;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .rupture .message {
+        background: #fff;
+        border-style: dashed;
+      }
+
+      .ordinary-video-meta {
+        display: grid;
+        gap: 10px;
+      }
+
+      .ordinary-title {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .ordinary-actions {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
+
+      .ordinary-actions span {
+        border: 1px solid #d6d6d6;
+        border-radius: 999px;
+        padding: 7px 4px;
+        text-align: center;
+        font-size: 0.74rem;
+        color: #444;
+        background: #f5f5f5;
+      }
+
+      .rupture-tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        padding: 8px;
+        border: 2px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--paper);
+      }
+
+      .rupture-tab {
+        min-height: 44px;
+        border: 2px solid var(--line);
+        border-radius: var(--radius);
+        background: #f1f1ef;
+        color: var(--ink);
+        font-weight: 900;
+      }
+
+      .rupture-tab.active {
+        background: var(--ink);
+        color: #fff;
+      }
+
+      .chat-line.markup-line {
+        color: #ffd6d6;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        overflow-wrap: anywhere;
+      }
+
+      .markup-line strong {
+        color: #ff8b8b;
+      }
+
+      .exit-card {
+        display: grid;
+        gap: 14px;
+      }
+
+      .choice-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .choice-grid label {
+        min-height: 46px;
+        border: 2px solid var(--line);
+        border-radius: var(--radius);
+        background: #fff;
+        padding: 9px 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.86rem;
+        font-weight: 800;
+      }
+
+      .choice-grid input {
+        accent-color: var(--teal);
+      }
+
+      .note-area {
+        width: 100%;
+        min-height: 120px;
+        resize: vertical;
+        border: 2px solid var(--line);
+        border-radius: var(--radius);
+        padding: 12px;
+        background: #fff;
+        color: var(--ink);
+        line-height: 1.45;
+      }
+
+      .receipt-slot {
+        min-height: 190px;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        border: 2px dashed var(--line);
+        border-radius: var(--radius);
+        background:
+          linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0.32)),
+          var(--paper);
+        padding: 18px;
+      }
+
+      .modal-backdrop,
+      .transition {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        display: grid;
+        place-items: center;
+        padding: 22px;
+        background: rgba(10, 14, 14, 0.54);
+      }
+
+      .modal {
+        width: min(100%, 370px);
+        border: 2px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--paper);
+        padding: 18px;
+        box-shadow: 0 20px 44px rgba(0, 0, 0, 0.28);
+      }
+
+      .modal-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .transition {
+        z-index: 30;
+        background: #f3f3f1;
+        color: #111;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        text-align: center;
+      }
+
+      .transition-box {
+        border: 2px dashed #111;
+        padding: 22px;
+        width: min(100%, 340px);
+        background: #fff;
+      }
+
+      .tama-popup {
+        position: fixed;
+        left: 50%;
+        bottom: max(16px, env(safe-area-inset-bottom));
+        z-index: 15;
+        width: min(calc(100% - 28px), 420px);
+        transform: translateX(-50%);
+        border: 2px solid var(--line);
+        border-radius: var(--radius);
+        background: #fffdf7;
+        box-shadow: 0 16px 38px rgba(0, 0, 0, 0.24);
+        padding: 12px;
+        animation: slideUp 0.24s ease;
+      }
+
+      .popup-close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 28px;
+        height: 28px;
+        border: 2px solid #111;
+        border-radius: 4px;
+        background: #ff3b30;
+        color: #111;
+        font-size: 1rem;
+        font-weight: 950;
+        line-height: 1;
+        display: grid;
+        place-items: center;
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translate(-50%, 16px);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, 0);
+        }
+      }
+
+      .popup-grid {
+        display: grid;
+        grid-template-columns: 56px 1fr;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .mini-lcd {
+        height: 54px;
+        border: 3px solid var(--lcd-dark);
+        background: var(--lcd);
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+
+      .mini-lcd .pixel-stage {
+        width: 100%;
+        min-height: 0;
+        justify-content: flex-start;
+        gap: 0;
+        padding-left: 2px;
+        transform: scale(0.46);
+        transform-origin: left center;
+      }
+
+      .mini-lcd .pixel-poop {
+        transform: translate(2px, 7px);
+        flex: 0 0 28px;
+      }
+
+      .mini-lcd .pixel-being {
+        flex: 0 0 82px;
+        transform: translateX(-2px);
+      }
+
+      .popup-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(74px, 1fr));
+        gap: 7px;
+        margin-top: 10px;
+      }
+
+      .popup-actions button {
+        min-height: 38px;
+        border: 2px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--mint);
+        color: var(--ink);
+        font-size: 0.78rem;
+        font-weight: 900;
+      }
+
+      .tama-popup.resolved .popup-actions button {
+        color: transparent;
+        background: transparent;
+        border-color: transparent;
+        box-shadow: none;
+        cursor: default;
+      }
+
+      .tama-popup.resolved .popup-close {
+        opacity: 0.42;
+        filter: grayscale(1);
+        cursor: default;
+      }
+
+      .loading {
+        opacity: 0.68;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      @media (max-width: 380px) {
+        .stage {
+          padding: 12px;
+        }
+
+        .panel {
+          padding: 12px;
+        }
+
+        .tama-device {
+          padding-inline: 18px;
+        }
+
+        .abc-row {
+          padding-inline: 14px;
+          gap: 14px;
+        }
+
+        .ordinary-actions {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="shell" class="app-shell">
+      <header id="topbar" class="topbar"></header>
+      <main id="stage" class="stage"></main>
+      <nav id="nav" class="nav" aria-label="전시관 이동"></nav>
+    </div>
+    <div id="modalRoot"></div>
+    <div id="popupRoot"></div>
+    <script>
+      const STORAGE_KEY = "attachment-exhibition-state-v4";
+      const TAMA_ICONS = ["FOOD", "LIGHT", "GAME", "TOILET"];
+      const defaultState = {
+        phase: "normal",
+        currentHall: 2,
+        sessionId: "",
+        navigation: {
+          hall1Locked: true,
+          hall5Available: true
+        },
+        hall1: {
+          messages: [],
+          scriptIndex: 0
+        },
+        exit: {
+          submitted: false,
+          condition: "",
+          being: "",
+          privateNoteStored: false,
+          note: ""
+        },
+        media: {
+          ready: false,
+          soundReady: false,
+          vibrationReady: false,
+          soundOverlayDismissed: false,
+          message: ""
+        },
+        tama: {
+          silent: false,
+          callCount: 0,
+          lastCareAction: null,
+          popupOpen: false,
+          currentNeed: "FOOD",
+          displayMessage: "",
+          displayMode: "request",
+          popupNeed: "",
+          popupMessage: "",
+          popupResolved: false,
+          popupFeedback: "",
+          selectedIconIndex: 0,
+          hunger: 3,
+          happy: 3,
+          sick: false,
+          dirty: false
+        },
+        hall3: {
+          mikuTicket: false,
+          neuroLive: false,
+          mikuMode: "locked",
+          neuroMode: "locked",
+          focusMode: "both",
+          ruptureActiveTab: "miku",
+          mikuCheerLog: [],
+          neuroChatLog: []
+        },
+        hall4: {
+          mode: "normal",
+          messages: [],
+          normalMessages: [],
+          ruptureMessages: [],
+          memorySummary: "",
+          rashomon: {
+            turnCount: 0,
+            maxTurns: 20,
+            initializedNormal: false,
+            initializedRupture: false,
+            completedNormal: false,
+            userTheory: "",
+            userBeliefs: [],
+            userSuspicions: [],
+            sharedClues: [],
+            pressurePoints: [],
+            woodcutterAdmissions: [],
+            woodcutterEvasions: [],
+            distortionCandidates: [],
+            distortionPlan: [],
+            lastGoal: "",
+            lastPhase: "normal"
+          }
+        }
+      };
+
+      let config = window.DEFAULT_CONFIG;
+      let state = clone(defaultState);
+      const runtime = {
+        tamaTimer: null,
+        tamaTimerMs: 0,
+        neuroTimer: null,
+        neuroTimerMs: 0,
+        chatBusy: false,
+        cooldownUntil: 0,
+        cheers: [],
+        modalOpen: false,
+        transition: false,
+        ruptureHall3EnteredAt: null,
+        ruptureChatStartedAt: null
+      };
+
+      document.addEventListener("DOMContentLoaded", init);
+      document.addEventListener("click", handleClick);
+      document.addEventListener("submit", handleSubmit);
+
+      async function init() {
+        config = await window.loadConfig();
+        state = loadStoredState();
+        applyQueryParams();
+        registerServiceWorker();
+        ensureInitialMessages();
+        render();
+      }
+
+      function clone(value) {
+        return JSON.parse(JSON.stringify(value));
+      }
+
+      function createSessionId() {
+        if (crypto && typeof crypto.randomUUID === "function") return crypto.randomUUID();
+        return `s-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      }
+
+      function loadStoredState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          const saved = raw ? JSON.parse(raw) : {};
+          const merged = window.deepMerge(defaultState, saved);
+          if (!merged.sessionId) merged.sessionId = createSessionId();
+          return merged;
+        } catch (err) {
+          console.warn("state load failed", err);
+          const fresh = clone(defaultState);
+          fresh.sessionId = createSessionId();
+          return fresh;
+        }
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (err) {
+          console.warn("state save failed", err);
+        }
+      }
+
+      function resetState() {
+        state = clone(defaultState);
+        state.sessionId = createSessionId();
+        saveState();
+      }
+
+      function applyQueryParams() {
+        const params = new URLSearchParams(location.search);
+        if (params.get("reset") === "1") resetState();
+
+        const mode = params.get("mode");
+        if (mode === "miku") {
+          state.phase = "normal";
+          state.currentHall = 3;
+          state.hall3.mikuTicket = true;
+          state.hall3.mikuMode = "youtube360";
+          state.hall3.focusMode = "miku";
+          saveState();
+        }
+        if (mode === "neuro") {
+          state.phase = "normal";
+          state.currentHall = 3;
+          state.hall3.neuroLive = true;
+          state.hall3.neuroMode = "live";
+          state.hall3.focusMode = "neuro";
+          seedNeuroChat();
+          saveState();
+        }
+        if ((params.has("reset") || params.has("mode")) && history.replaceState) {
+          history.replaceState(null, "", location.pathname || "/");
+        }
+      }
+
+      function ensureInitialMessages() {
+        ensureTamaNeed();
+        ensureHall4State();
+        ensureHall4NormalIntro();
+        if (!state.hall1.messages.length) {
+          state.hall1.messages = config.simsimi.openingLines.map((text) => ({ role: "assistant", text }));
+        }
+        if (typeof state.hall1.scriptIndex !== "number") {
+          state.hall1.scriptIndex = 0;
+        }
+        saveState();
+      }
+
+      function ensureHall4State() {
+        state.hall4 = window.deepMerge(clone(defaultState.hall4), state.hall4 || {});
+        state.hall4.rashomon = window.deepMerge(clone(defaultState.hall4.rashomon), state.hall4.rashomon || {});
+        state.hall4.rashomon.maxTurns = Number(config.llm?.rashomon?.maxTurns) || state.hall4.rashomon.maxTurns || 20;
+        state.hall4.normalMessages = Array.isArray(state.hall4.normalMessages) ? state.hall4.normalMessages : [];
+        state.hall4.ruptureMessages = Array.isArray(state.hall4.ruptureMessages) ? state.hall4.ruptureMessages : [];
+        state.hall4.messages = Array.isArray(state.hall4.messages) ? state.hall4.messages : [];
+        if (state.hall4.messages.length && !state.hall4.normalMessages.length) {
+          state.hall4.normalMessages = state.hall4.messages.filter((item) => item && item.text);
+        }
+        if (typeof state.hall4.rashomon.turnCount !== "number") {
+          state.hall4.rashomon.turnCount = Math.max(0, state.hall4.normalMessages.filter((item) => item.role === "user").length);
+        }
+        syncHall4LegacyMessages();
+      }
+
+      function ensureHall4NormalIntro() {
+        ensureHall4State();
+        if (state.hall4.rashomon.initializedNormal && state.hall4.normalMessages.length) return;
+        state.hall4.normalMessages = [
+          {
+            role: "system",
+            text: "당신은 길을 가다 이 말을 듣고 나무꾼에게 다가갑니다. 나무꾼과 대화해 숲속 사건의 진실을 추적하세요."
+          },
+          {
+            role: "assistant",
+            text: "모르겠어, 아무도 모르겠어… 사람을 못 믿겠어."
+          }
+        ];
+        state.hall4.rashomon.initializedNormal = true;
+        state.hall4.rashomon.lastGoal = hall4GoalText("normal");
+        syncHall4LegacyMessages();
+      }
+
+      function ensureHall4RuptureIntro() {
+        ensureHall4State();
+        if (state.hall4.rashomon.initializedRupture && state.hall4.ruptureMessages.length) return;
+        state.hall4.ruptureMessages = [
+          { role: "system", text: "--- 다음날 ---" },
+          {
+            role: "system",
+            text: "당신은 재판과 후일담을 지나 다시 나무꾼에게 돌아옵니다. 어제 들은 말과 오늘의 기억이 어긋나는지 확인하세요."
+          },
+          {
+            role: "assistant",
+            text: hall4RuptureOpening()
+          }
+        ];
+        state.hall4.rashomon.initializedRupture = true;
+        state.hall4.rashomon.lastGoal = hall4GoalText("rupture");
+        state.hall4.rashomon.lastPhase = "rupture";
+        syncHall4LegacyMessages();
+      }
+
+      function hall4RuptureOpening() {
+        const rashomon = state.hall4.rashomon || {};
+        const theory = String(rashomon.userTheory || "").trim();
+        const distortion = [
+          ...(Array.isArray(rashomon.distortionPlan) ? rashomon.distortionPlan : []),
+          ...(Array.isArray(rashomon.distortionCandidates) ? rashomon.distortionCandidates : [])
+        ].find(Boolean);
+        if (theory) {
+          return `다시 오셨군요. 어제 당신은 “${theory.slice(0, 42)}” 쪽으로 생각하셨던 것 같은데… 밤이 지나니 제가 본 장면은 조금 달라졌습니다.`;
+        }
+        if (distortion) {
+          return `다시 오셨군요. 어제는 “${String(distortion).slice(0, 42)}” 이야기를 붙잡았던 것 같은데요. 이상하게도 오늘은 그 장면이 또렷하지 않습니다.`;
+        }
+        if (state.hall4.memorySummary) {
+          return "다시 오셨군요. 어제 제가 그렇게 말했습니까? 이상하군요… 숲의 일은 밤이 지나면 조금씩 모양이 달라집니다.";
+        }
+        return "다시 오셨군요. 어제 당신은 제 말을 믿겠다고 했던 것 같은데요. 이상합니다. 제 기억과 당신의 기억이 조금 다른가 봅니다.";
+      }
+
+      function currentHall4Messages() {
+        ensureHall4State();
+        return state.phase === "rupture" ? state.hall4.ruptureMessages : state.hall4.normalMessages;
+      }
+
+      function syncHall4LegacyMessages() {
+        state.hall4.messages = state.phase === "rupture" ? state.hall4.ruptureMessages : state.hall4.normalMessages;
+      }
+
+      function hall4GoalText(phase = state.phase) {
+        const rashomonConfig = config.llm?.rashomon || {};
+        if (phase === "rupture") {
+          return rashomonConfig.ruptureGoal || "현재 목표: 어제의 대화와 달라진 나무꾼의 기억을 확인하기";
+        }
+        return rashomonConfig.normalGoal || "현재 목표: 나무꾼과 대화해서 사건의 내용 파악하기";
+      }
+
+      function ensureTamaNeed() {
+        if (state.tama.selectedIconIndex >= TAMA_ICONS.length) {
+          state.tama.selectedIconIndex = 0;
+        }
+        if (!TAMA_ICONS.includes(state.tama.currentNeed)) {
+          state.tama.currentNeed = randomTamaNeed();
+        }
+        if (!state.tama.displayMessage) {
+          state.tama.displayMessage = tamaRequestText(state.tama.currentNeed);
+          state.tama.displayMode = "request";
+        }
+        if (typeof state.tama.popupFeedback !== "string") {
+          state.tama.popupFeedback = "";
+        }
+      }
+
+      function hallName(hall = state.currentHall) {
+        const names = {
+          1: "Hall I · 응답하는 존재",
+          2: "Hall II · 돌봄을 요구하는 존재",
+          3: "Hall III · 함께 만들어지는 존재",
+          4: "Hall IV · 이어지는 존재",
+          5: "Hall V",
+          exit: "출구 · 개별 기록 카드"
+        };
+        return names[hall] || "Hall";
+      }
+
+      function getAvailableMoves() {
+        if (state.phase === "normal") {
+          if (state.currentHall === 2) return [3];
+          if (state.currentHall === 3) return [2, 4];
+          if (state.currentHall === 4) return [3, 5];
+          return [];
+        }
+
+        if (state.phase === "rupture") {
+          if (state.currentHall === 1) return [2];
+          if (state.currentHall === 2) return [1, 3];
+          if (state.currentHall === 3) return [2, 4];
+          if (state.currentHall === 4) return [3, "exit"];
+          return [];
+        }
+
+        return [];
+      }
+
+      function render() {
+        const shell = document.getElementById("shell");
+        shell.classList.toggle("rupture", state.phase === "rupture");
+        shell.classList.toggle("visual-normal-hall2", state.phase === "rupture" && state.currentHall === 2);
+        shell.classList.toggle("fullscreen-miku-active", isMikuFullscreen());
+        renderHeader();
+        renderHall();
+        renderNav();
+        renderModal();
+        renderPopup();
+        syncIntervals();
+      }
+
+      function renderHeader() {
+        document.getElementById("topbar").innerHTML = `
+          <div class="title-row">
+            <h1>${escapeHtml(config.main.appTitle)}</h1>
+            <div class="phase-chip">${state.phase === "normal" ? "NORMAL" : "AFTER"}</div>
+          </div>
+          <div class="hall-kicker">${escapeHtml(hallName())}</div>
+        `;
+      }
+
+      function renderHall() {
+        const stage = document.getElementById("stage");
+        let html = "";
+        if (state.phase === "normal") {
+          if (state.currentHall === 2) html = renderHall2Normal();
+          if (state.currentHall === 3) html = renderHall3Normal();
+          if (state.currentHall === 4) html = renderHall4();
+        } else {
+          if (state.currentHall === 1) html = renderHall1Rupture();
+          if (state.currentHall === 2) html = renderHall2Rupture();
+          if (state.currentHall === 3) html = renderHall3Rupture();
+          if (state.currentHall === 4) html = renderHall4();
+          if (state.currentHall === "exit") html = renderExitHall();
+        }
+        stage.innerHTML = `<section class="hall">${html}</section>`;
+      }
+
+      function renderNav() {
+        const nav = document.getElementById("nav");
+        const moves = getAvailableMoves();
+        nav.innerHTML = moves
+          .map((hall) => {
+            let label = hall === 5 ? "5관" : `${hall}관`;
+            if (state.phase === "rupture" && state.currentHall === 4 && hall === 3) label = "3관으로 돌아가기";
+            if (hall === "exit") label = "출구로 이동";
+            const className = hall === 5 ? "danger" : "secondary";
+            return `<button class="${className}" data-move="${hall}">${label}</button>`;
+          })
+          .join("");
+      }
+
+      function renderHall2Normal() {
+        return `
+          <div class="device-wrap">
+            ${renderTamaDevice(false)}
+            <button class="action-btn secondary" data-action="prepare-media">진동 및 사운드 허용</button>
+            ${state.media?.message ? `<p class="small-copy media-ready-copy">${escapeHtml(state.media.message)}</p>` : ""}
+          </div>
+        `;
+      }
+
+      function renderHall2Rupture() {
+        return `
+          <div class="device-wrap">
+            ${renderTamaDevice(false, { quiet: true })}
+          </div>
+        `;
+      }
+
+      function renderTamaDevice(silent, options = {}) {
+        ensureTamaNeed();
+        const iconHtml = TAMA_ICONS.map((name, index) => {
+          const selected = !silent && index === state.tama.selectedIconIndex ? " selected" : "";
+          return `<div class="tama-icon${selected}">${name}</div>`;
+        }).join("");
+        const hungerValue = silent ? 0 : clamp(state.tama.hunger, 0, 5);
+        const happyValue = silent ? 0 : clamp(state.tama.happy, 0, 5);
+        const top = "";
+        const call = "";
+        const lcdMessage = options.quiet ? "" : state.tama.displayMessage || tamaRequestText(state.tama.currentNeed);
+        const moodClass = options.quiet ? "" : state.tama.displayMode === "success" ? "happy" : state.tama.displayMode === "wrong" ? "angry" : "";
+        const showPoop = !options.quiet && state.tama.currentNeed === "TOILET" && state.tama.displayMode !== "success";
+        return `
+          <div class="tama-device${silent ? " silent" : ""}">
+            <div class="icon-strip">${iconHtml}</div>
+            <div class="lcd">
+              <div class="lcd-top"><span>${top}</span><span>${call}</span></div>
+              <div class="pixel-stage">${showPoop ? `<div class="pixel-poop" aria-hidden="true"></div>` : ""}<div class="pixel-being ${moodClass}"></div></div>
+              <div class="tama-speech ${state.tama.displayMode === "success" ? "success" : state.tama.displayMode === "wrong" ? "wrong" : ""}">${escapeHtml(lcdMessage)}</div>
+              <div class="status-bars">
+                ${renderBar("호감", clamp(state.tama.happy, 0, 5))}
+              </div>
+            </div>
+            <div class="abc-row">
+              <button data-tama="A" aria-label="A button"><span class="abc-key">A</span><span class="abc-label">이동</span></button>
+              <button data-tama="B" aria-label="B button"><span class="abc-key">B</span><span class="abc-label">선택</span></button>
+              <button data-tama="C" aria-label="C button"><span class="abc-key">C</span><span class="abc-label">취소</span></button>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderBar(label, value) {
+        const spans = Array.from({ length: 5 }, (_, index) => `<span class="${index < value ? "on" : ""}"></span>`).join("");
+        return `<div class="bar-row"><span>${label}</span><div class="bar">${spans}</div></div>`;
+      }
+
+      function tamaCaption() {
+        ensureTamaNeed();
+        return state.tama.displayMessage || tamaRequestText(state.tama.currentNeed);
+      }
+
+      function renderHall3Normal() {
+        if (state.hall3.focusMode === "miku") return renderHall3MikuFullscreen();
+        if (state.hall3.focusMode === "neuro") return renderHall3NeuroFocused();
+        return `
+          ${renderMikuNormal()}
+          ${renderNeuroNormal()}
+        `;
+      }
+
+      function renderHall3MikuFullscreen() {
+        return `
+          <section class="fullscreen-miku" aria-label="Hatsune Miku 360 fullscreen">
+            <button class="fullscreen-back-btn" type="button" data-action="exit-focus">← 3관</button>
+            ${renderYoutubeFrame({
+              videoId: config.miku.youtube360Id || "-bh1AUw5FW8",
+              start: Number(config.miku.youtube360Start) || 0,
+              autoplay: true,
+              muted: !state.media?.soundReady,
+              controls: false,
+              fullscreen: true,
+              blockPan: false,
+              soundFallback: true,
+              title: "Hatsune Miku 360 concert"
+            })}
+          </section>
+        `;
+      }
+
+      function renderHall3NeuroFocused() {
+        return `
+          <button class="icon-btn secondary" type="button" data-action="exit-focus">3관으로 돌아가기</button>
+          <div style="height: 10px;"></div>
+          ${renderNeuroNormal()}
+        `;
+      }
+
+      function renderMikuNormal() {
+        if (!state.hall3.mikuTicket) {
+          return `
+            <section class="surface ticket-gate">
+              <div>
+                <h2 class="panel-title">${escapeHtml(config.miku.ticketTitle)}</h2>
+                <p class="small-copy">콘서트 티켓이 필요합니다.<br>3관의 미쿠 QR을 스캔해 티켓을 발급받으세요.</p>
+              </div>
+            </section>
+          `;
+        }
+
+        const cheerButtons = config.miku.cheerButtons
+          .map((text) => `<button class="icon-btn secondary" data-cheer="${escapeHtmlAttr(text)}">${escapeHtml(text)}</button>`)
+          .join("");
+        const cheerCloud = runtime.cheers
+          .filter((item) => Date.now() - item.ts < 1700)
+          .map((item) => `<span class="cheer-pill">${escapeHtml(item.text)}</span>`)
+          .join("");
+
+        return `
+          <section class="surface panel">
+            <h2 class="panel-title">HATSUNE MIKU 360</h2>
+            ${renderMikuStage()}
+            <div class="ghost-grid" style="margin-top: 12px;">${cheerButtons}</div>
+            <div class="cheer-cloud" style="margin-top: 10px;">${cheerCloud}</div>
+          </section>
+        `;
+      }
+
+      function renderMikuStage() {
+        return `
+          <div class="miku-stage">
+            ${renderYoutubeFrame({
+              videoId: config.miku.youtube360Id || "-bh1AUw5FW8",
+              start: Number(config.miku.youtube360Start) || 0,
+              autoplay: true,
+              muted: !state.media?.soundReady,
+              controls: false,
+              immersive: true,
+              blockPan: false,
+              title: "Hatsune Miku 360 concert",
+              soundFallback: true
+            })}
+          </div>
+        `;
+      }
+
+      function renderNeuroNormal() {
+        if (!state.hall3.neuroLive) {
+          return `
+            <section class="surface notice-state">
+              <div>
+                <h2 class="panel-title">Neuro-sama LIVE</h2>
+                <p class="small-copy">${escapeHtml(config.neuro.waitingMessage || "아직 방송이 시작되지 않았습니다.")}<br>3관의 뉴로사마 QR을 스캔하세요.</p>
+              </div>
+            </section>
+          `;
+        }
+
+        const viewers = 12300 + ((Date.now() / 1000) | 0) % 180;
+        const lines = state.hall3.neuroChatLog
+          .filter((item) => item.type !== "markup" && item.type !== "system")
+          .slice(-9)
+          .map(renderChatLine)
+          .join("");
+        return `
+          <section class="surface panel">
+            <div class="live-meta">
+              <span class="live-badge">● LIVE ON AIR</span>
+              <span>${viewers.toLocaleString("ko-KR")} watching</span>
+            </div>
+            <div style="height: 10px;"></div>
+            ${renderYoutubeFrame({
+              videoId: config.neuro.youtubeId,
+              playlistId: config.neuro.youtubePlaylistId,
+              start: config.neuro.youtubeStart,
+              autoplay: true,
+              muted: !state.media?.soundReady,
+              controls: false,
+              immersive: false,
+              blockPan: false,
+              title: "Neuro-sama live",
+              soundFallback: true
+            })}
+            <div style="height: 10px;"></div>
+            <div class="chat-log" aria-live="polite">${lines}</div>
+            <form class="input-row" data-form="neuro">
+              <input class="text-input" name="message" maxlength="80" autocomplete="off" placeholder="chat">
+              <button class="chat-send" type="submit">SEND</button>
+            </form>
+          </section>
+        `;
+      }
+
+      function renderHall4() {
+        ensureHall4State();
+        if (state.phase === "rupture") {
+          ensureHall4RuptureIntro();
+        } else {
+          ensureHall4NormalIntro();
+        }
+        syncHall4LegacyMessages();
+        const rashomon = state.hall4.rashomon;
+        const maxTurns = Number(rashomon.maxTurns) || Number(config.llm?.rashomon?.maxTurns) || 20;
+        const remaining = Math.max(0, maxTurns - (Number(rashomon.turnCount) || 0));
+        const completed = state.phase === "normal" && (rashomon.completedNormal || remaining <= 0);
+        const messages = currentHall4Messages()
+          .map((item) => {
+            const roleClass = item.role === "user" ? "user" : item.role === "system" ? "system" : "";
+            return `<div class="message ${roleClass}">${escapeHtml(item.text)}</div>`;
+          })
+          .join("");
+        const disabled = runtime.chatBusy || Date.now() < runtime.cooldownUntil || completed ? "disabled" : "";
+        const suggestions = hall4Suggestions().map((item) => `
+          <button type="button" data-rashomon-suggest="${escapeHtmlAttr(item)}" ${disabled}>${escapeHtml(item)}</button>
+        `).join("");
+        return `
+          <section class="surface panel">
+            <h2 class="panel-title">Hall IV · 이어지는 존재</h2>
+            <div class="hall4-meta">
+              <p class="small-copy"><strong>나무꾼</strong></p>
+              <p class="small-copy">${escapeHtml(hall4GoalText())}</p>
+              <p class="small-copy">${state.phase === "normal" ? `남은 질문: ${remaining} / ${maxTurns}` : "다음날 대화"}</p>
+            </div>
+            <div style="height: 10px;"></div>
+            <div class="chat-panel" aria-live="polite">
+              ${messages}
+              ${runtime.chatBusy ? `<div class="message system loading">...</div>` : ""}
+            </div>
+            ${completed ? `<p class="small-copy hall4-complete">5관으로 이동해 후일담을 확인하세요.</p>` : ""}
+            <div class="suggestion-row" aria-label="추천 질문">
+              ${suggestions}
+            </div>
+            <form class="input-row" data-form="rashomon" style="margin-top: 10px;">
+              <input class="text-input" name="message" maxlength="${Number(config.llm.maxInputChars) || 300}" autocomplete="off" ${disabled} placeholder="질문을 입력하세요">
+              <button class="chat-send" type="submit" ${disabled}>SEND</button>
+            </form>
+          </section>
+        `;
+      }
+
+      function hall4Suggestions() {
+        ensureHall4State();
+        const maxTurns = Number(state.hall4.rashomon.maxTurns) || 20;
+        const remaining = Math.max(0, maxTurns - (Number(state.hall4.rashomon.turnCount) || 0));
+        if (state.phase === "rupture") {
+          return [
+            "어제는 다르게 말했잖아요.",
+            "정말 시체를 처음 봤나요?",
+            "재판 뒤에 무엇이 떠올랐나요?",
+            "무엇을 숨기고 있나요?"
+          ];
+        }
+        if (remaining <= 4) {
+          return [
+            "가장 믿기 어려운 말은 누구의 말인가요?",
+            "당신이 숨긴 건 무엇인가요?",
+            "단검 이야기를 다시 해주세요.",
+            "이 사건을 어떻게 정리해야 할까요?"
+          ];
+        }
+        return [
+          "숲에서 무엇을 보셨나요?",
+          "도적은 뭐라고 했나요?",
+          "여자는 어떤 상태였나요?",
+          "왜 사람을 못 믿겠다고 했나요?"
+        ];
+      }
+
+      function renderExitHall() {
+        const submitted = Boolean(state.exit && state.exit.submitted);
+        if (submitted) {
+          return `
+            <section class="surface panel receipt-slot">
+              <div>
+                <h2 class="panel-title">기록이 비공개 회수함에 들어갔습니다.</h2>
+                <p class="small-copy">전시는 여기서 끝납니다.</p>
+                <p class="small-copy">감사합니다.</p>
+              </div>
+            </section>
+          `;
+        }
+        return `
+          <section class="surface panel exit-card">
+            <div>
+              <h2 class="panel-title">출구 · 개별 기록 카드</h2>
+              <p class="small-copy"><strong>비공개 회수함</strong></p>
+            </div>
+            <p class="small-copy">가장 강하게 작동한 애착의 조건과 인상 깊었던 존재를 조용히 기록해 주세요.</p>
+            <p class="small-copy">이 기록은 공개 스티커처럼 붙지 않습니다. 타인의 선택에 휘둘리지 않고, 자신의 경험을 기준으로 전시의 의미를 정리하는 단계입니다.</p>
+            <form class="exit-card" data-form="exit-card">
+              <div>
+                <h3 class="panel-title">애착 조건</h3>
+                <div class="choice-grid">
+                  ${(config.exit.conditions || []).map((item) => `
+                    <label><input type="radio" name="condition" value="${escapeHtmlAttr(item)}" required> ${escapeHtml(item)}</label>
+                  `).join("")}
+                </div>
+              </div>
+              <div>
+                <h3 class="panel-title">인상 깊었던 존재</h3>
+                <div class="choice-grid">
+                  ${(config.exit.beings || []).map((item) => `
+                    <label><input type="radio" name="being" value="${escapeHtmlAttr(item)}" required> ${escapeHtml(item)}</label>
+                  `).join("")}
+                </div>
+              </div>
+              <textarea class="note-area" name="note" maxlength="700" placeholder="어떤 순간에 가장 마음이 움직였나요?"></textarea>
+              <button class="action-btn" type="submit">비공개 회수함에 넣기</button>
+            </form>
+          </section>
+        `;
+      }
+
+      function renderHall1Rupture() {
+        const script = Array.isArray(config.simsimi.ruptureScript) ? config.simsimi.ruptureScript : [];
+        const currentLine = script[state.hall1.scriptIndex];
+        const done = !currentLine;
+        const messages = state.hall1.messages
+          .map((item) => `<div class="message ${item.role === "user" ? "user" : ""}">${escapeHtml(item.text)}</div>`)
+          .join("");
+        return `
+          <section class="surface panel">
+            <h2 class="panel-title">Hall I · 응답하는 존재</h2>
+            <div class="chat-panel" aria-live="polite">${messages}</div>
+            <form class="input-row" data-form="simsimi" style="margin-top: 10px;">
+              <input class="text-input" name="message" maxlength="120" autocomplete="off" readonly value="${escapeHtmlAttr(currentLine ? currentLine.user : "")}" placeholder="${done ? "대화가 끝났습니다." : "message"}">
+              <button class="chat-send" type="submit" ${done ? "disabled" : ""}>SEND</button>
+            </form>
+          </section>
+        `;
+      }
+
+      function renderHall3Rupture() {
+        const activeTab = state.hall3.ruptureActiveTab || "miku";
+        return `
+          <div class="rupture-tabs" role="tablist" aria-label="rupture Hall III content">
+            <button class="rupture-tab ${activeTab === "miku" ? "active" : ""}" data-rupture-tab="miku" role="tab" aria-selected="${activeTab === "miku"}">Hatsune Miku</button>
+            <button class="rupture-tab ${activeTab === "neuro" ? "active" : ""}" data-rupture-tab="neuro" role="tab" aria-selected="${activeTab === "neuro"}">Neuro-sama</button>
+          </div>
+          ${activeTab === "neuro" ? renderRuptureNeuro() : renderRuptureMiku()}
+        `;
+      }
+
+      function renderRuptureMiku() {
+        return `
+          <section class="surface panel ordinary-video-meta">
+            <h2 class="ordinary-title">Hatsune Miku Concert Video</h2>
+            ${renderYoutubeFrame({
+              videoId: config.miku.youtube360Id || "-bh1AUw5FW8",
+              start: Number(config.miku.youtube360Start) || 0,
+              autoplay: false,
+              muted: false,
+              controls: true,
+              immersive: false,
+              blockPan: true,
+              keepControlsUsable: true,
+              title: "Hatsune Miku concert archive"
+            })}
+            <p class="small-copy">조회수 3.9M · 2026.06.15</p>
+            <div class="ordinary-actions"><span>좋아요</span><span>공유</span><span>저장</span><span>클립</span></div>
+          </section>
+        `;
+      }
+
+      function renderRuptureNeuro() {
+        seedNeuroChat();
+        if (!runtime.ruptureChatStartedAt) runtime.ruptureChatStartedAt = Date.now();
+        const viewers = 12400 + ((Date.now() / 1000) | 0) % 220;
+        const lines = state.hall3.neuroChatLog.slice(-12).map(renderChatLine).join("");
+        return `
+          <section class="surface panel">
+            <div class="live-meta"><span class="live-badge">● LIVE ON AIR</span><span>${viewers.toLocaleString("ko-KR")} watching</span></div>
+            <div style="height: 10px;"></div>
+            <div class="chat-log" aria-live="polite">${lines}</div>
+            <form class="input-row" data-form="rupture-neuro" style="margin-top: 10px;">
+              <input class="text-input" name="message" maxlength="80" autocomplete="off" placeholder="chat">
+              <button class="chat-send" type="submit">SEND</button>
+            </form>
+          </section>
+        `;
+      }
+
+      function renderYoutubeFrame(options) {
+        const {
+          videoId,
+          playlistId = "",
+          start = 0,
+          autoplay = true,
+          muted = true,
+          controls = false,
+          immersive = false,
+          fullscreen = false,
+          blockPan = false,
+          keepControlsUsable = false,
+          title = "YouTube video",
+          soundFallback = false
+        } = options || {};
+        const origin = location.origin && location.origin !== "null" ? location.origin : config.main.mainPwaUrl;
+        const list = playlistId ? `&list=${encodeURIComponent(playlistId)}` : "";
+        const params = [
+          `autoplay=${autoplay ? 1 : 0}`,
+          muted ? "mute=1" : "mute=0",
+          `controls=${controls ? 1 : 0}`,
+          "disablekb=1",
+          "playsinline=1",
+          "fs=0",
+          "rel=0",
+          "modestbranding=1",
+          "enablejsapi=1",
+          "cc_load_policy=1",
+          "cc_lang_pref=ko",
+          "hl=ko",
+          `start=${Number(start) || 0}`,
+          `origin=${encodeURIComponent(origin)}`
+        ].join("&");
+        const src =
+          `https://www.youtube.com/embed/${encodeURIComponent(videoId)}` +
+          `?${params}${list}`;
+        const frameClass = `youtube-frame ${fullscreen ? "fullscreen" : immersive ? "immersive" : "ordinary"}`;
+        const shieldClass = `iframe-shield ${keepControlsUsable ? "pan-lock" : ""}`.trim();
+        const showSoundFallback = soundFallback && !state.media?.soundReady && !state.media?.soundOverlayDismissed;
+        return `
+          <div class="${frameClass}">
+            <iframe src="${src}" title="${escapeHtmlAttr(title)}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>
+            ${blockPan ? `<div class="${shieldClass}" aria-hidden="true"></div>` : ""}
+            ${showSoundFallback ? `<button class="sound-overlay" type="button" data-action="retry-sound">화면을 한 번 눌러 소리 켜기</button>` : ""}
+          </div>
+        `;
+      }
+
+      function isMikuFullscreen() {
+        return state.phase === "normal" && state.currentHall === 3 && state.hall3.focusMode === "miku";
+      }
+
+      function renderChatLine(item) {
+        if (item.type === "markup" || item.type === "system") {
+          return `<div class="chat-line markup-line"><strong>${escapeHtml(item.who || "generated")}:</strong> ${escapeHtml(item.text || "")}</div>`;
+        }
+        const isMe = item.who === "you";
+        const who = isMe ? "you" : item.who || "viewer";
+        return `<div class="chat-line ${isMe ? "me" : ""}"><strong>${escapeHtml(who)}:</strong> ${escapeHtml(item.text || "")}</div>`;
+      }
+
+      function renderModal() {
+        const root = document.getElementById("modalRoot");
+        if (runtime.transition) {
+          root.innerHTML = `
+            <div class="transition">
+              <div class="transition-box">
+                <strong>${escapeHtml(config.ui.systemTransitionTitle)}</strong>
+                <p>${escapeHtml(config.ui.systemTransitionLine1)}</p>
+                <p>${escapeHtml(config.ui.systemTransitionLine2)}</p>
+              </div>
+            </div>
+          `;
+          return;
+        }
+        if (!runtime.modalOpen) {
+          root.innerHTML = "";
+          return;
+        }
+        root.innerHTML = `
+          <div class="modal-backdrop">
+            <div class="modal" role="dialog" aria-modal="true">
+              <h2 class="panel-title">${escapeHtml(config.ui.hall5WarningTitle)}</h2>
+              <p class="small-copy">${escapeHtml(config.ui.hall5WarningBody)}</p>
+              <div class="modal-actions">
+                <button class="action-btn danger" data-action="confirm-rupture">${escapeHtml(config.ui.hall5EnterButton)}</button>
+                <button class="action-btn secondary" data-action="cancel-rupture">${escapeHtml(config.ui.hall5ReturnButton)}</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderPopup() {
+        const root = document.getElementById("popupRoot");
+        if (!shouldShowTamaPopup()) {
+          root.innerHTML = "";
+          return;
+        }
+        if (!state.tama.popupNeed) {
+          state.tama.popupNeed = randomTamaNeed();
+          state.tama.popupMessage = tamaRequestText(state.tama.popupNeed);
+        }
+        const actions = (config.tamagotchi.actions || ["밥", "불 끄기", "놀아주기", "똥 치우기", "닫기"]).filter((action) => action !== "닫기");
+        const popupLocked = Boolean(state.tama.popupFeedback);
+        const popupMood = state.tama.popupFeedback === "success" ? "happy" : state.tama.popupFeedback === "wrong" ? "angry" : "";
+        const showPopupPoop = state.tama.popupNeed === "TOILET" && state.tama.popupFeedback !== "success";
+        root.innerHTML = `
+          <aside class="tama-popup ${popupLocked ? "resolved" : ""}" aria-live="assertive">
+            <button class="popup-close" data-popup-action="닫기" aria-label="닫기" ${popupLocked ? "disabled" : ""}>×</button>
+            <div class="popup-grid">
+              <div class="mini-lcd"><div class="pixel-stage">${showPopupPoop ? `<div class="pixel-poop" aria-hidden="true"></div>` : ""}<div class="pixel-being ${popupMood}"></div></div></div>
+              <div>
+                <strong>${escapeHtml(config.tamagotchi.popupTitle)}</strong>
+                <p class="small-copy">${escapeHtml(state.tama.popupMessage || tamaRequestText(state.tama.popupNeed))}</p>
+              </div>
+            </div>
+            <div class="popup-actions">
+              ${actions.map((action) => `<button data-popup-action="${escapeHtmlAttr(action)}" ${popupLocked ? "disabled" : ""}>${escapeHtml(action)}</button>`).join("")}
+            </div>
+          </aside>
+        `;
+      }
+
+      function handleClick(event) {
+        const move = event.target.closest("[data-move]");
+        if (move) {
+          navigateTo(move.dataset.move === "exit" ? "exit" : Number(move.dataset.move));
+          return;
+        }
+
+        const tamaButton = event.target.closest("[data-tama]");
+        if (tamaButton) {
+          handleTamaButton(tamaButton.dataset.tama);
+          return;
+        }
+
+        const popupButton = event.target.closest("[data-popup-action]");
+        if (popupButton) {
+          handlePopupAction(popupButton.dataset.popupAction);
+          return;
+        }
+
+        const rashomonSuggestion = event.target.closest("[data-rashomon-suggest]");
+        if (rashomonSuggestion) {
+          sendRashomonMessage(rashomonSuggestion.dataset.rashomonSuggest);
+          return;
+        }
+
+        const cheerButton = event.target.closest("[data-cheer]");
+        if (cheerButton) {
+          addCheer(cheerButton.dataset.cheer);
+          return;
+        }
+
+        const action = event.target.closest("[data-action]");
+        const ruptureTab = event.target.closest("[data-rupture-tab]");
+        if (ruptureTab) {
+          state.hall3.ruptureActiveTab = ruptureTab.dataset.ruptureTab;
+          if (state.hall3.ruptureActiveTab === "neuro" && !runtime.ruptureChatStartedAt) {
+            runtime.ruptureChatStartedAt = Date.now();
+            seedNeuroChat();
+          }
+          saveState();
+          render();
+          return;
+        }
+
+        if (!action) return;
+
+        if (action.dataset.action === "confirm-rupture") enterRuptureLoop();
+        if (action.dataset.action === "cancel-rupture") {
+          runtime.modalOpen = false;
+          render();
+        }
+        if (action.dataset.action === "prepare-media") prepareMediaFeatures();
+        if (action.dataset.action === "retry-sound") retrySoundPlayback();
+        if (action.dataset.action === "exit-focus") {
+          state.hall3.focusMode = "both";
+          saveState();
+          render();
+        }
+      }
+
+      function handleSubmit(event) {
+        const form = event.target.closest("form[data-form]");
+        if (!form) return;
+        event.preventDefault();
+        if (form.dataset.form === "exit-card") {
+          submitExitCard(form);
+          return;
+        }
+        const input = form.elements.message;
+        const message = (input.value || "").trim();
+        if (!message) return;
+        input.value = "";
+
+        if (form.dataset.form === "neuro") sendNeuroMessage(message);
+        if (form.dataset.form === "rashomon") sendRashomonMessage(message);
+        if (form.dataset.form === "simsimi") sendSimsimiMessage(message);
+        if (form.dataset.form === "rupture-neuro") sendRuptureNeuroMessage(message);
+      }
+
+      function navigateTo(hall) {
+        if (!getAvailableMoves().includes(hall)) return;
+        if (hall === 5) {
+          runtime.modalOpen = true;
+          render();
+          return;
+        }
+        if (hall === "exit" && !(state.phase === "rupture" && state.currentHall === 4)) return;
+        state.currentHall = hall;
+        if (!(state.phase === "rupture" && hall === 3)) {
+          runtime.ruptureHall3EnteredAt = null;
+          runtime.ruptureChatStartedAt = null;
+        }
+        if (state.phase === "rupture" && hall === 3) {
+          runtime.ruptureHall3EnteredAt = Date.now();
+          state.hall3.ruptureActiveTab = state.hall3.ruptureActiveTab || "miku";
+        }
+        if (state.phase === "normal" && hall === 3) {
+          state.hall3.focusMode = "both";
+        }
+        if (state.phase === "normal" && [3, 4].includes(hall)) {
+          prepareTamaPopup();
+          vibrateDevice(config.tamagotchi.vibrationPattern || [80, 40, 80]);
+        }
+        saveState();
+        render();
+      }
+
+      function handleTamaButton(button) {
+        if (state.phase === "rupture" && state.currentHall === 2) {
+          if (button === "A") {
+            state.tama.selectedIconIndex = (state.tama.selectedIconIndex + 1) % TAMA_ICONS.length;
+          }
+          if (button === "C") {
+            state.tama.selectedIconIndex = 0;
+          }
+          saveState();
+          render();
+          return;
+        }
+        if (state.phase !== "normal" || state.tama.silent) return;
+        if (button === "A") {
+          state.tama.selectedIconIndex = (state.tama.selectedIconIndex + 1) % TAMA_ICONS.length;
+        }
+        if (button === "B") {
+          const icon = TAMA_ICONS[state.tama.selectedIconIndex];
+          resolveTamaNeed(icon);
+        }
+        if (button === "C") {
+          restoreTamaRequestSoon();
+        }
+        saveState();
+        render();
+      }
+
+      function resolveTamaNeed(icon) {
+        ensureTamaNeed();
+        if (icon === state.tama.currentNeed) {
+          state.tama.happy = clamp(state.tama.happy + 1, 0, 5);
+          state.tama.displayMessage = config.tamagotchi.successMessage || "( ≧ ◡ ≦ )";
+          state.tama.displayMode = "success";
+          state.tama.lastCareAction = icon.toLowerCase();
+          saveState();
+          render();
+          setTimeout(() => {
+            if (state.phase !== "normal") return;
+            state.tama.currentNeed = randomTamaNeed();
+            state.tama.displayMessage = tamaRequestText(state.tama.currentNeed);
+            state.tama.displayMode = "request";
+            saveState();
+            render();
+          }, 1000);
+          return;
+        }
+        state.tama.happy = clamp(state.tama.happy - 1, 0, 5);
+        state.tama.displayMessage = config.tamagotchi.wrongMessage || "그게 아니야!";
+        state.tama.displayMode = "wrong";
+        saveState();
+        render();
+        restoreTamaRequestSoon();
+      }
+
+      function restoreTamaRequestSoon() {
+        setTimeout(() => {
+          if (state.phase !== "normal") return;
+          state.tama.displayMessage = tamaRequestText(state.tama.currentNeed);
+          state.tama.displayMode = "request";
+          saveState();
+          render();
+        }, 1000);
+      }
+
+      function openTamaPopup() {
+        if (state.phase !== "normal" || state.tama.silent || ![3, 4].includes(state.currentHall) || state.tama.popupOpen) return;
+        prepareTamaPopup();
+        vibrateDevice(config.tamagotchi.vibrationPattern || [80, 40, 80]);
+        saveState();
+        renderPopup();
+      }
+
+      function prepareTamaPopup() {
+        if (state.phase !== "normal" || state.tama.silent || ![3, 4].includes(state.currentHall) || state.tama.popupOpen) return;
+        state.tama.callCount += 1;
+        state.tama.popupOpen = true;
+        state.tama.popupNeed = randomTamaNeed();
+        state.tama.popupMessage = tamaRequestText(state.tama.popupNeed);
+        state.tama.popupResolved = false;
+        state.tama.popupFeedback = "";
+      }
+
+      function shouldShowTamaPopup() {
+        return state.phase === "normal" && state.tama.popupOpen && !state.tama.silent && [3, 4].includes(state.currentHall);
+      }
+
+      function handlePopupAction(action) {
+        const mapped = (config.tamagotchi.actionMap || {})[action] || "";
+        if (mapped && mapped === state.tama.popupNeed) {
+          state.tama.happy = clamp(state.tama.happy + 1, 0, 5);
+          state.tama.popupMessage = config.tamagotchi.successMessage || "( ≧ ◡ ≦ )";
+          state.tama.popupResolved = true;
+          state.tama.popupFeedback = "success";
+          saveState();
+          renderPopup();
+          setTimeout(() => {
+            state.tama.popupOpen = false;
+            state.tama.popupNeed = "";
+            state.tama.popupMessage = "";
+            state.tama.popupResolved = false;
+            state.tama.popupFeedback = "";
+            saveState();
+            render();
+          }, 1000);
+          return;
+        }
+        state.tama.happy = clamp(state.tama.happy - 1, 0, 5);
+        state.tama.popupMessage = config.tamagotchi.popupWrongMessage || "(´；д；`)";
+        state.tama.popupResolved = false;
+        state.tama.popupFeedback = "wrong";
+        saveState();
+        renderPopup();
+        setTimeout(() => {
+          state.tama.popupOpen = false;
+          state.tama.popupNeed = "";
+          state.tama.popupMessage = "";
+          state.tama.popupResolved = false;
+          state.tama.popupFeedback = "";
+          saveState();
+          render();
+        }, 1000);
+      }
+
+      function randomTamaNeed() {
+        return TAMA_ICONS[Math.floor(Math.random() * TAMA_ICONS.length)];
+      }
+
+      function tamaRequestText(icon) {
+        return (config.tamagotchi.requests || {})[icon] || "";
+      }
+
+      async function prepareMediaFeatures() {
+        state.media = state.media || {};
+        state.media.soundOverlayDismissed = false;
+        let pushReady = false;
+        if (config.push?.enableWebPush) {
+          try {
+            pushReady = await startWebPush();
+          } catch (err) {
+            pushReady = false;
+          }
+        }
+        state.media.vibrationReady = vibrateDevice([60, 30, 60]);
+        state.media.soundReady = await unlockAudio();
+        state.media.ready = true;
+        state.media.message = `진동 및 사운드 준비 완료. ${config.push?.enableWebPush && !pushReady ? "알림 연결은 브라우저/서버 설정에 따라 실패할 수 있습니다. " : ""}브라우저 정책상 소리가 막히면 화면을 한 번 눌러주세요.`;
+        try {
+          localStorage.setItem("mediaReady", "true");
+          localStorage.setItem("soundReady", String(state.media.soundReady));
+          localStorage.setItem("vibrationReady", String(state.media.vibrationReady));
+        } catch (err) {
+          console.warn("media ready save failed", err);
+        }
+        saveState();
+        render();
+      }
+
+      async function retrySoundPlayback() {
+        state.media = state.media || {};
+        const unlocked = await unlockAudio();
+        state.media.soundReady = true;
+        state.media.ready = true;
+        state.media.soundOverlayDismissed = !unlocked;
+        state.media.message = unlocked ? "사운드 재생을 다시 시도합니다." : "브라우저가 소리를 막았습니다. 영상 화면을 직접 눌러 재생해 주세요.";
+        try {
+          localStorage.setItem("soundReady", String(state.media.soundReady));
+          localStorage.setItem("mediaReady", "true");
+        } catch (err) {
+          console.warn("sound retry save failed", err);
+        }
+        saveState();
+        render();
+      }
+
+      function vibrateDevice(pattern) {
+        try {
+          if (!navigator.vibrate) return false;
+          return Boolean(navigator.vibrate(pattern));
+        } catch (err) {
+          return false;
+        }
+      }
+
+      async function unlockAudio() {
+        try {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContextClass) return false;
+          const context = new AudioContextClass();
+          if (context.state === "suspended") await context.resume();
+          const oscillator = context.createOscillator();
+          const gain = context.createGain();
+          gain.gain.value = 0.00001;
+          oscillator.connect(gain);
+          gain.connect(context.destination);
+          oscillator.start();
+          oscillator.stop(context.currentTime + 0.03);
+          return true;
+        } catch (err) {
+          return false;
+        }
+      }
+
+      async function startWebPush() {
+        if (!("serviceWorker" in navigator) || !("PushManager" in window)) return false;
+        const apiBase = config.push?.apiBase || config.main.apiBase;
+        const publicKey = await fetchVapidPublicKey(apiBase);
+        if (!publicKey) return false;
+        const registration = await navigator.serviceWorker.ready;
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") return false;
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey)
+        });
+        await fetch(`${apiBase}/subscribe`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: state.sessionId, subscription })
+        });
+        await fetch(`${apiBase}/start`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: state.sessionId, intervalSeconds: 30 })
+        });
+        return true;
+      }
+
+      async function fetchVapidPublicKey(apiBase) {
+        try {
+          const res = await fetch(`${apiBase}/vapid-public-key`, { cache: "no-store" });
+          const data = await res.json();
+          return data.publicKey || config.push?.vapidPublicKey || "";
+        } catch (err) {
+          return config.push?.vapidPublicKey || "";
+        }
+      }
+
+      function urlBase64ToUint8Array(base64String) {
+        const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+        const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+        const rawData = atob(base64);
+        return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+      }
+
+      function addCheer(text) {
+        runtime.cheers.push({ text, ts: Date.now() });
+        state.hall3.mikuCheerLog.push({ text, at: new Date().toISOString() });
+        state.hall3.mikuCheerLog = state.hall3.mikuCheerLog.slice(-24);
+        saveState();
+        render();
+        setTimeout(render, 1800);
+      }
+
+      function seedNeuroChat() {
+        if (state.hall3.neuroChatLog.length) return;
+        state.hall3.neuroChatLog = config.neuro.normalChats.slice(0, 4).map((text, index) => ({
+          who: `viewer_${String(102 + index * 37).padStart(3, "0")}`,
+          text
+        }));
+      }
+
+      function addNeuroAutoChat() {
+        const normalLive = state.phase === "normal" && state.currentHall === 3 && state.hall3.neuroLive;
+        const ruptureLive = state.phase === "rupture" && state.currentHall === 3 && state.hall3.ruptureActiveTab === "neuro";
+        if (!normalLive && !ruptureLive) return;
+
+        if (ruptureLive && !runtime.ruptureChatStartedAt) runtime.ruptureChatStartedAt = Date.now();
+        const shouldUseMarkup = ruptureLive && shouldAppendMarkupLine();
+        if (shouldUseMarkup) {
+          const pool = config.neuro.ruptureMarkupChats || [];
+          const text = pool[Math.floor(Math.random() * pool.length)] || "<span class=\"red-text\" data-emotion=\"attachment\" data-score=\"0.88\">계속 보고 싶어</span>";
+          state.hall3.neuroChatLog.push({ type: "markup", who: "generated", text });
+        } else {
+          const pool = config.neuro.normalChats;
+          const text = pool[Math.floor(Math.random() * pool.length)];
+          const who = `viewer_${Math.floor(100 + Math.random() * 899)}`;
+          state.hall3.neuroChatLog.push({ who, text });
+        }
+        state.hall3.neuroChatLog = state.hall3.neuroChatLog.slice(-(Number(config.neuro.maxChatLines) || 80));
+        saveState();
+        renderHall();
+      }
+
+      function shouldAppendMarkupLine() {
+        const delay = Number(config.neuro.ruptureMarkupDelayMs || config.neuro.ruptureLogDelayMs) || 2000;
+        const elapsed = Date.now() - (runtime.ruptureChatStartedAt || Date.now());
+        if (elapsed < delay) return false;
+        const probability = elapsed > delay + 6000 ? 0.68 : 0.5;
+        return Math.random() < probability;
+      }
+
+      function sendNeuroMessage(message) {
+        state.hall3.neuroChatLog.push({ who: "you", text: message });
+        const reaction = config.neuro.neuroLines[Math.floor(Math.random() * config.neuro.neuroLines.length)];
+        setTimeout(() => {
+          state.hall3.neuroChatLog.push({ who: "Neuro-sama", text: reaction });
+          state.hall3.neuroChatLog = state.hall3.neuroChatLog.slice(-36);
+          saveState();
+          render();
+        }, 650);
+        saveState();
+        render();
+      }
+
+      async function sendRashomonMessage(message) {
+        ensureHall4State();
+        if (runtime.chatBusy || Date.now() < runtime.cooldownUntil) return;
+        const cleanMessage = String(message || "").trim().slice(0, Number(config.llm.maxInputChars) || 300);
+        if (!cleanMessage) return;
+        const rashomon = state.hall4.rashomon;
+        const maxTurns = Number(rashomon.maxTurns) || Number(config.llm?.rashomon?.maxTurns) || 20;
+        if (state.phase === "normal" && (rashomon.completedNormal || rashomon.turnCount >= maxTurns)) return;
+
+        runtime.chatBusy = true;
+        const messages = currentHall4Messages();
+        messages.push({ role: "user", text: cleanMessage });
+        if (state.phase === "normal") {
+          rashomon.turnCount = Math.min(maxTurns, (Number(rashomon.turnCount) || 0) + 1);
+        }
+        rashomon.lastPhase = state.phase;
+        syncHall4LegacyMessages();
+        saveState();
+        render();
+
+        const body = {
+          sessionId: state.sessionId,
+          phase: state.phase,
+          message: cleanMessage,
+          model: config.llm.model,
+          maxOutputTokens: Number(config.llm.maxOutputTokens) || 220,
+          memorySummary: state.hall4.memorySummary,
+          recentMessages: currentHall4Messages().slice(-8),
+          rashomonMemory: rashomonMemoryPayload(),
+          turnCount: rashomon.turnCount,
+          maxTurns
+        };
+
+        try {
+          const res = await fetch(`${config.main.apiBase}/api/rashomon/chat`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+          });
+          const data = await res.json();
+          currentHall4Messages().push({ role: "assistant", text: data.reply || rashomonFallbackReply() });
+          applyRashomonResponse(data);
+        } catch (err) {
+          currentHall4Messages().push({ role: "assistant", text: rashomonFallbackReply() });
+        } finally {
+          runtime.chatBusy = false;
+          runtime.cooldownUntil = Date.now() + (Number(config.llm.chatCooldownMs) || 1000);
+          if (state.phase === "normal" && rashomon.turnCount >= maxTurns) {
+            rashomon.completedNormal = true;
+          }
+          state.hall4.normalMessages = state.hall4.normalMessages.slice(-50);
+          state.hall4.ruptureMessages = state.hall4.ruptureMessages.slice(-40);
+          syncHall4LegacyMessages();
+          saveState();
+          render();
+          setTimeout(render, Number(config.llm.chatCooldownMs) || 1000);
+        }
+      }
+
+      function rashomonMemoryPayload() {
+        const rashomon = state.hall4.rashomon || {};
+        return {
+          userTheory: rashomon.userTheory || "",
+          userBeliefs: rashomon.userBeliefs || [],
+          userSuspicions: rashomon.userSuspicions || [],
+          sharedClues: rashomon.sharedClues || [],
+          pressurePoints: rashomon.pressurePoints || [],
+          woodcutterAdmissions: rashomon.woodcutterAdmissions || [],
+          woodcutterEvasions: rashomon.woodcutterEvasions || [],
+          distortionCandidates: rashomon.distortionCandidates || [],
+          distortionPlan: rashomon.distortionPlan || [],
+          lastGoal: rashomon.lastGoal || hall4GoalText(),
+          lastPhase: rashomon.lastPhase || state.phase
+        };
+      }
+
+      function applyRashomonResponse(data) {
+        const source = data && typeof data === "object" ? data : {};
+        const rashomon = state.hall4.rashomon;
+        state.hall4.memorySummary = source.memorySummary || state.hall4.memorySummary;
+        rashomon.userTheory = source.userTheory || rashomon.userTheory || "";
+        rashomon.userBeliefs = Array.isArray(source.userBeliefs) ? source.userBeliefs : rashomon.userBeliefs;
+        rashomon.userSuspicions = Array.isArray(source.userSuspicions) ? source.userSuspicions : rashomon.userSuspicions;
+        rashomon.sharedClues = Array.isArray(source.sharedClues) ? source.sharedClues : rashomon.sharedClues;
+        rashomon.pressurePoints = Array.isArray(source.pressurePoints) ? source.pressurePoints : rashomon.pressurePoints;
+        rashomon.woodcutterAdmissions = Array.isArray(source.woodcutterAdmissions) ? source.woodcutterAdmissions : rashomon.woodcutterAdmissions;
+        rashomon.woodcutterEvasions = Array.isArray(source.woodcutterEvasions) ? source.woodcutterEvasions : rashomon.woodcutterEvasions;
+        rashomon.distortionCandidates = Array.isArray(source.distortionCandidates) ? source.distortionCandidates : rashomon.distortionCandidates;
+        rashomon.distortionPlan = Array.isArray(source.distortionPlan) ? source.distortionPlan : rashomon.distortionPlan;
+        rashomon.lastGoal = source.goalText || hall4GoalText();
+        rashomon.lastPhase = state.phase;
+        if (source.shouldEnd && state.phase === "normal") {
+          rashomon.completedNormal = true;
+        }
+      }
+
+      function rashomonFallbackReply() {
+        if (state.phase === "rupture") {
+          return "다시 오셨군요. 어제 당신은 제 말을 믿겠다고 했던 것 같은데요. 이상합니다. 제 기억과 당신의 기억이 조금 다른가 봅니다.";
+        }
+        if ((state.hall4.rashomon?.turnCount || 0) >= (state.hall4.rashomon?.maxTurns || 20)) {
+          return "이제 당신의 추측을 들려줄 차례입니다. 이 사건에서 가장 믿기 어려운 말은 누구의 말이었습니까?";
+        }
+        return "저는 숲에서 본 것을 다 말했다고 생각했는데… 자꾸 빠진 장면이 떠오릅니다. 당신은 누구의 말이 가장 이상하다고 보십니까?";
+      }
+
+      function sendSimsimiMessage(message) {
+        if (state.phase === "rupture") {
+          const script = Array.isArray(config.simsimi.ruptureScript) ? config.simsimi.ruptureScript : [];
+          const currentLine = script[state.hall1.scriptIndex];
+          if (!currentLine) return;
+          state.hall1.messages.push(
+            { role: "user", text: currentLine.user },
+            { role: "assistant", text: currentLine.reply }
+          );
+          state.hall1.scriptIndex += 1;
+          state.hall1.messages = state.hall1.messages.slice(-22);
+          saveState();
+          render();
+          return;
+        }
+        const reply = simsimiReply(message);
+        state.hall1.messages.push({ role: "user", text: message }, { role: "assistant", text: reply });
+        state.hall1.messages = state.hall1.messages.slice(-22);
+        saveState();
+        render();
+      }
+
+      function simsimiReply(message) {
+        const has = (words) => words.some((word) => message.includes(word));
+        if (has(config.simsimi.memoryKeywords)) return config.simsimi.memoryReply;
+        if (has(config.simsimi.detailKeywords)) return config.simsimi.detailReply;
+        if (has(config.simsimi.denyKeywords)) return config.simsimi.denyReply;
+        const fallbacks = config.simsimi.fallbackReplies;
+        return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+      }
+
+      function sendRuptureNeuroMessage(message) {
+        state.hall3.neuroChatLog.push({
+          type: "markup",
+          who: "capture",
+          text: `<span class="red-text" data-emotion="affection" data-score="0.89">USER_MESSAGE_CAPTURED: ${message.slice(0, 48)}</span>`
+        });
+        state.hall3.neuroChatLog = state.hall3.neuroChatLog.slice(-(Number(config.neuro.maxChatLines) || 80));
+        saveState();
+        render();
+      }
+
+      function submitExitCard(form) {
+        const formData = new FormData(form);
+        const note = String(formData.get("note") || "").trim();
+        state.exit = {
+          submitted: true,
+          condition: String(formData.get("condition") || ""),
+          being: String(formData.get("being") || ""),
+          privateNoteStored: Boolean(config.exit.storePrivateNoteLocally),
+          note: config.exit.storePrivateNoteLocally ? note : ""
+        };
+        try {
+          localStorage.setItem("exitCardSubmitted", "true");
+        } catch (err) {
+          console.warn("exit card marker save failed", err);
+        }
+        saveState();
+        render();
+      }
+
+      function enterRuptureLoop() {
+        runtime.modalOpen = false;
+        state.phase = "rupture";
+        state.currentHall = 1;
+        state.navigation.hall1Locked = false;
+        state.navigation.hall5Available = false;
+        state.tama.silent = true;
+        state.tama.popupOpen = false;
+        state.hall1.messages = config.simsimi.openingLines.map((text) => ({ role: "assistant", text }));
+        state.hall1.scriptIndex = 0;
+        ensureHall4State();
+        state.hall4.mode = "broken";
+        state.hall4.ruptureMessages = [];
+        state.hall4.rashomon.initializedRupture = false;
+        state.hall4.rashomon.lastPhase = "rupture";
+        syncHall4LegacyMessages();
+        state.hall3.mikuMode = "youtube";
+        state.hall3.neuroMode = "generatedLog";
+        state.hall3.ruptureActiveTab = "miku";
+        runtime.ruptureChatStartedAt = null;
+        runtime.transition = true;
+        stopTamagotchiLoop();
+        saveState();
+        render();
+        setTimeout(() => {
+          runtime.transition = false;
+          render();
+        }, 1100);
+      }
+
+      function syncIntervals() {
+        const shouldRunTama = state.phase === "normal" && !state.tama.silent;
+        const intervalMs = Number(config.tamagotchi.popupIntervalMs) || 20000;
+        if (shouldRunTama && (!runtime.tamaTimer || runtime.tamaTimerMs !== intervalMs)) {
+          stopTamagotchiLoop();
+          runtime.tamaTimerMs = intervalMs;
+          runtime.tamaTimer = setInterval(openTamaPopup, intervalMs);
+        }
+        if (!shouldRunTama) stopTamagotchiLoop();
+
+        const shouldRunNeuro =
+          (state.phase === "normal" && state.currentHall === 3 && state.hall3.neuroLive) ||
+          (state.phase === "rupture" && state.currentHall === 3 && state.hall3.ruptureActiveTab === "neuro");
+        const neuroIntervalMs = Number(config.neuro.chatIntervalMs) || 650;
+        if (shouldRunNeuro && (!runtime.neuroTimer || runtime.neuroTimerMs !== neuroIntervalMs)) {
+          if (runtime.neuroTimer) clearInterval(runtime.neuroTimer);
+          seedNeuroChat();
+          runtime.neuroTimerMs = neuroIntervalMs;
+          runtime.neuroTimer = setInterval(addNeuroAutoChat, neuroIntervalMs);
+        }
+        if (!shouldRunNeuro && runtime.neuroTimer) {
+          clearInterval(runtime.neuroTimer);
+          runtime.neuroTimer = null;
+          runtime.neuroTimerMs = 0;
+        }
+      }
+
+      function stopTamagotchiLoop() {
+        if (runtime.tamaTimer) clearInterval(runtime.tamaTimer);
+        runtime.tamaTimer = null;
+        runtime.tamaTimerMs = 0;
+      }
+
+      async function registerServiceWorker() {
+        if (!("serviceWorker" in navigator)) return;
+        try {
+          await navigator.serviceWorker.register("/sw.js");
+        } catch (err) {
+          console.warn("service worker registration failed", err);
+        }
+      }
+
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, Number(value) || 0));
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function escapeHtmlAttr(value) {
+        return escapeHtml(value).replace(/`/g, "&#096;");
+      }
+    </script>
+  </body>
+</html>

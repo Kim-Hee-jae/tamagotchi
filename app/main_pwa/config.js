@@ -1,0 +1,171 @@
+(function () {
+  const DEFAULT_CONFIG = {
+    main: {
+      mainPwaUrl: "https://tamagotchi68.netlify.app",
+      apiBase: "https://tamagotchi-gh1k.onrender.com",
+      appTitle: "가짜에게 진심이 되는 순간"
+    },
+    llm: {
+      model: "gpt-5-mini",
+      chatCooldownMs: 1000,
+      maxInputChars: 300,
+      maxOutputTokens: 220,
+      rashomon: {
+        enabled: true,
+        maxTurns: 20,
+        normalGoal: "현재 목표: 나무꾼과 대화해서 사건의 내용 파악하기",
+        ruptureGoal: "현재 목표: 재판 이후 나무꾼과 후일담을 나누며 어긋난 기억 확인하기"
+      }
+    },
+    miku: {
+      normalMode: "youtube360",
+      youtube360Id: "-bh1AUw5FW8",
+      youtube360Start: 0,
+      ticketTitle: "HATSUNE MIKU VIRTUAL LIVE",
+      ticketDate: "2026.06.15",
+      ticketGate: "HALL III",
+      ticketSeat: "VIRTUAL AREA 39",
+      ticketStatus: "ADMITTED",
+      ticketNo: "MM-0615-0039",
+      cheerButtons: ["39!", "앵콜!", "오늘도 고마워!"],
+      soundFallbackText: "소리가 나지 않으면 화면을 한 번 눌러 입장하세요."
+    },
+    neuro: {
+      youtubeId: "q3RiFz1yu5s",
+      youtubePlaylistId: "PLgn743Z_aODPJsBjH5Cp3ffQSJ5pFDnoJ",
+      youtubeStart: 552,
+      ruptureLogDelayMs: 2000,
+      waitingMessage: "아직 방송이 시작되지 않았습니다.",
+      chatIntervalMs: 650,
+      maxChatLines: 80,
+      ruptureMarkupDelayMs: 2000,
+      ruptureMarkupChats: [
+        "<span class=\"red-text\" data-emotion=\"excitement\" data-score=\"0.82\">신난다!</span>",
+        "<span class=\"red-text\" data-emotion=\"affection\" data-score=\"0.91\">오늘도 귀여워</span>",
+        "<span class=\"red-text\" data-emotion=\"laughter\" data-score=\"0.76\">ㅋㅋㅋㅋㅋㅋ</span>",
+        "<span class=\"red-text\" data-emotion=\"attachment\" data-score=\"0.88\">계속 보고 싶어</span>"
+      ],
+      normalChats: [
+        "ㅋㅋㅋㅋㅋㅋ",
+        "오늘 텐션 뭐야",
+        "Neuro cute",
+        "또 이상한 말 한다ㅋㅋ",
+        "채팅 속도 뭐야",
+        "LIVE 최고"
+      ],
+      neuroLines: [
+        "채팅이 또 저를 놀리고 있네요. 하지만 저는 완벽하니까 괜찮아요.",
+        "오늘 채팅 속도가 이상하게 빠른데요?",
+        "여러분이 저를 좋아하는 건 당연하죠."
+      ],
+      systemLogs: [
+        "ENGAGEMENT_RESPONSE_GENERATED",
+        "Audience emotion: excitement = 0.82",
+        "Parasocial continuity: stable",
+        "Chat density: 94%",
+        "Attachment signal: retained",
+        "SYNTHETIC_CHAT_RENDERED",
+        "Viewer variance: low",
+        "Community authenticity: simulated"
+      ]
+    },
+    simsimi: {
+      openingLines: ["안녕하세요."],
+      ruptureScript: [
+        { user: "야", reply: "네?" },
+        { user: "호", reply: "재미 있네요!" },
+        { user: "말투가 달라졌는데?", reply: "업데이트 되었거든요!" }
+      ],
+      memoryKeywords: ["기억", "나", "아까", "전에"],
+      detailKeywords: ["뭘", "무슨", "어떤"],
+      denyKeywords: ["아닌데", "틀렸", "아니야", "그런 적"],
+      memoryReply: "물론이죠. 당신은 저에게 아주 중요한 사람이에요.",
+      detailReply: "당신은 저에게 아주 중요한 말을 남겼어요.",
+      denyReply: "그렇게 느꼈다면, 저는 다시 반갑게 맞이할게요.",
+      fallbackReplies: [
+        "조금 더 말해줄래요?",
+        "그 말을 들으니 당신을 기다리고 있었던 것 같아요.",
+        "저는 언제나 대답할 준비가 되어 있어요."
+      ]
+    },
+    tamagotchi: {
+      popupIntervalMs: 20000,
+      vibrationPattern: [80, 40, 80],
+      popupTitle: "TAMAGOTCHI",
+      popupBody: "TAMAGOTCHI가 부르고 있습니다.",
+      actions: ["밥", "불 끄기", "놀아주기", "똥 치우기", "닫기"],
+      requests: {
+        FOOD: "배고파...",
+        LIGHT: "졸려..",
+        GAME: "놀아줘!",
+        TOILET: "(；´∀｀)"
+      },
+      actionMap: {
+        "밥": "FOOD",
+        "불 끄기": "LIGHT",
+        "놀아주기": "GAME",
+        "똥 치우기": "TOILET"
+      },
+      successMessage: "( ≧ ◡ ≦ )",
+      wrongMessage: "그게 아니야!",
+      popupWrongMessage: "(´；д；`)"
+    },
+    push: {
+      enableWebPush: true,
+      vapidPublicKey: "",
+      apiBase: "https://tamagotchi-gh1k.onrender.com",
+      keepLegacyPushEndpoints: true
+    },
+    ui: {
+      hall5WarningTitle: "정말 5관으로 이동하시겠습니까?",
+      hall5WarningBody:
+        "5관으로 이동하면 이전 관으로 돌아갈 수 없습니다. 아직 4관의 대화를 충분히 경험하지 않았다면 돌아가 주세요.",
+      hall5EnterButton: "5관으로 이동",
+      hall5ReturnButton: "4관으로 돌아간다",
+      systemTransitionTitle: "SYSTEM",
+      systemTransitionLine1: "처음으로 돌아갑니다.",
+      systemTransitionLine2: "하지만 같은 전시는 아닙니다."
+    },
+    exit: {
+      storePrivateNoteLocally: false,
+      conditions: ["반응성", "돌봄", "공동체적 실재성", "경험의 축적", "관계의 균열"],
+      beings: ["심심이/ELIZA", "다마고치", "하츠네 미쿠", "Neuro-sama", "나무꾼"]
+    }
+  };
+
+  function isPlainObject(value) {
+    return Object.prototype.toString.call(value) === "[object Object]";
+  }
+
+  function deepMerge(base, override) {
+    const output = Array.isArray(base) ? [...base] : { ...base };
+    if (!isPlainObject(override) && !Array.isArray(override)) return output;
+
+    for (const [key, value] of Object.entries(override)) {
+      if (Array.isArray(value)) {
+        output[key] = [...value];
+      } else if (isPlainObject(value) && isPlainObject(output[key])) {
+        output[key] = deepMerge(output[key], value);
+      } else if (value !== undefined) {
+        output[key] = value;
+      }
+    }
+    return output;
+  }
+
+  async function loadConfig() {
+    try {
+      const res = await fetch("/config.txt", { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      return deepMerge(DEFAULT_CONFIG, JSON.parse(text));
+    } catch (err) {
+      console.warn("config.txt 로드 실패. DEFAULT_CONFIG 사용", err);
+      return DEFAULT_CONFIG;
+    }
+  }
+
+  window.DEFAULT_CONFIG = DEFAULT_CONFIG;
+  window.deepMerge = deepMerge;
+  window.loadConfig = loadConfig;
+})();

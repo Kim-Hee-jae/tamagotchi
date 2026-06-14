@@ -1,0 +1,7 @@
+# private runtime secrets
+private_config.txt
+**/private_config.txt
+.env
+.env.*
+!.env.example
+node_modules/
