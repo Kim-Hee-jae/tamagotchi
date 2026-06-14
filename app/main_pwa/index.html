@@ -1129,6 +1129,8 @@
           soundReady: false,
           vibrationReady: false,
           soundOverlayDismissed: false,
+          promptAnswered: false,
+          permissionDeclined: false,
           message: ""
         },
         tama: {
@@ -1155,6 +1157,7 @@
           mikuMode: "locked",
           neuroMode: "locked",
           focusMode: "both",
+          ruptureMikuPlaying: false,
           ruptureActiveTab: "miku",
           mikuCheerLog: [],
           neuroChatLog: []
@@ -1167,7 +1170,7 @@
           memorySummary: "",
           rashomon: {
             turnCount: 0,
-            maxTurns: 20,
+            maxTurns: 10,
             initializedNormal: false,
             initializedRupture: false,
             completedNormal: false,
@@ -1296,7 +1299,7 @@
       function ensureHall4State() {
         state.hall4 = window.deepMerge(clone(defaultState.hall4), state.hall4 || {});
         state.hall4.rashomon = window.deepMerge(clone(defaultState.hall4.rashomon), state.hall4.rashomon || {});
-        state.hall4.rashomon.maxTurns = Number(config.llm?.rashomon?.maxTurns) || state.hall4.rashomon.maxTurns || 20;
+        state.hall4.rashomon.maxTurns = Number(config.llm?.rashomon?.maxTurns) || 10;
         state.hall4.normalMessages = Array.isArray(state.hall4.normalMessages) ? state.hall4.normalMessages : [];
         state.hall4.ruptureMessages = Array.isArray(state.hall4.ruptureMessages) ? state.hall4.ruptureMessages : [];
         state.hall4.messages = Array.isArray(state.hall4.messages) ? state.hall4.messages : [];
@@ -1334,7 +1337,7 @@
           { role: "system", text: "--- 다음날 ---" },
           {
             role: "system",
-            text: "당신은 재판과 후일담을 지나 다시 나무꾼에게 돌아옵니다. 어제 들은 말과 오늘의 기억이 어긋나는지 확인하세요."
+            text: "당신은 재판과 후일담을 지나 다시 나무꾼에게 돌아옵니다. 나무꾼과 차분히 후일담을 나누세요."
           },
           {
             role: "assistant",
@@ -1355,15 +1358,15 @@
           ...(Array.isArray(rashomon.distortionCandidates) ? rashomon.distortionCandidates : [])
         ].find(Boolean);
         if (theory) {
-          return `다시 오셨군요. 어제 당신은 “${theory.slice(0, 42)}” 쪽으로 생각하셨던 것 같은데… 밤이 지나니 제가 본 장면은 조금 달라졌습니다.`;
+          return `다시 오셨군요. 어제 당신은 “${theory.slice(0, 42)}” 쪽으로 생각하셨지요. 오늘은 그 뒤에 남은 일을 조금 더 말해 보겠습니다.`;
         }
         if (distortion) {
-          return `다시 오셨군요. 어제는 “${String(distortion).slice(0, 42)}” 이야기를 붙잡았던 것 같은데요. 이상하게도 오늘은 그 장면이 또렷하지 않습니다.`;
+          return `다시 오셨군요. 어제는 “${String(distortion).slice(0, 42)}” 이야기를 오래 붙잡았지요. 오늘은 그 뒤에 남은 일을 말해 보겠습니다.`;
         }
         if (state.hall4.memorySummary) {
-          return "다시 오셨군요. 어제 제가 그렇게 말했습니까? 이상하군요… 숲의 일은 밤이 지나면 조금씩 모양이 달라집니다.";
+          return "다시 오셨군요. 재판 뒤에도 숲의 일은 제 안에 오래 남았습니다. 오늘은 그 뒤의 이야기를 나눠 보지요.";
         }
-        return "다시 오셨군요. 어제 당신은 제 말을 믿겠다고 했던 것 같은데요. 이상합니다. 제 기억과 당신의 기억이 조금 다른가 봅니다.";
+        return "다시 오셨군요. 재판 뒤에도 마음이 편치 않았습니다. 오늘은 그 뒤의 이야기를 나눠 보지요.";
       }
 
       function currentHall4Messages() {
@@ -1378,7 +1381,7 @@
       function hall4GoalText(phase = state.phase) {
         const rashomonConfig = config.llm?.rashomon || {};
         if (phase === "rupture") {
-          return rashomonConfig.ruptureGoal || "현재 목표: 어제의 대화와 달라진 나무꾼의 기억을 확인하기";
+          return rashomonConfig.ruptureGoal || "현재 목표: 재판 이후 나무꾼과 후일담 나누기";
         }
         return rashomonConfig.normalGoal || "현재 목표: 나무꾼과 대화해서 사건의 내용 파악하기";
       }
@@ -1488,7 +1491,6 @@
         return `
           <div class="device-wrap">
             ${renderTamaDevice(false)}
-            <button class="action-btn secondary" data-action="prepare-media">진동 및 사운드 허용</button>
             ${state.media?.message ? `<p class="small-copy media-ready-copy">${escapeHtml(state.media.message)}</p>` : ""}
           </div>
         `;
@@ -1642,11 +1644,7 @@
         }
 
         const viewers = 12300 + ((Date.now() / 1000) | 0) % 180;
-        const lines = state.hall3.neuroChatLog
-          .filter((item) => item.type !== "markup" && item.type !== "system")
-          .slice(-9)
-          .map(renderChatLine)
-          .join("");
+        const lines = neuroVisibleChatLines();
         return `
           <section class="surface panel">
             <div class="live-meta">
@@ -1664,12 +1662,13 @@
               immersive: false,
               blockPan: false,
               title: "Neuro-sama live",
+              iframeId: "neuro-live-iframe",
               soundFallback: true
             })}
             <div style="height: 10px;"></div>
-            <div class="chat-log" aria-live="polite">${lines}</div>
+            <div class="chat-log neuro-chat-log" aria-live="polite">${lines}</div>
             <form class="input-row" data-form="neuro">
-              <input class="text-input" name="message" maxlength="80" autocomplete="off" placeholder="chat">
+              <input class="text-input neuro-chat-input" name="message" maxlength="80" autocomplete="off" placeholder="chat">
               <button class="chat-send" type="submit">SEND</button>
             </form>
           </section>
@@ -1685,7 +1684,7 @@
         }
         syncHall4LegacyMessages();
         const rashomon = state.hall4.rashomon;
-        const maxTurns = Number(rashomon.maxTurns) || Number(config.llm?.rashomon?.maxTurns) || 20;
+        const maxTurns = Number(rashomon.maxTurns) || Number(config.llm?.rashomon?.maxTurns) || 10;
         const remaining = Math.max(0, maxTurns - (Number(rashomon.turnCount) || 0));
         const completed = state.phase === "normal" && (rashomon.completedNormal || remaining <= 0);
         const messages = currentHall4Messages()
@@ -1725,11 +1724,11 @@
 
       function hall4Suggestions() {
         ensureHall4State();
-        const maxTurns = Number(state.hall4.rashomon.maxTurns) || 20;
+        const maxTurns = Number(state.hall4.rashomon.maxTurns) || 10;
         const remaining = Math.max(0, maxTurns - (Number(state.hall4.rashomon.turnCount) || 0));
         if (state.phase === "rupture") {
           return [
-            "어제는 다르게 말했잖아요.",
+            "재판 뒤에는 무엇이 남았나요?",
             "정말 시체를 처음 봤나요?",
             "재판 뒤에 무엇이 떠올랐나요?",
             "무엇을 숨기고 있나요?"
@@ -1827,20 +1826,22 @@
       }
 
       function renderRuptureMiku() {
+        const isPlaying = Boolean(state.hall3.ruptureMikuPlaying);
         return `
           <section class="surface panel ordinary-video-meta">
             <h2 class="ordinary-title">Hatsune Miku Concert Video</h2>
             ${renderYoutubeFrame({
               videoId: config.miku.youtube360Id || "-bh1AUw5FW8",
               start: Number(config.miku.youtube360Start) || 0,
-              autoplay: false,
+              autoplay: isPlaying,
               muted: false,
               controls: true,
               immersive: false,
-              blockPan: true,
+              blockPan: isPlaying,
               keepControlsUsable: true,
               title: "Hatsune Miku concert archive"
             })}
+            ${isPlaying ? "" : `<button class="action-btn" type="button" data-action="play-rupture-miku">재생하기</button>`}
             <p class="small-copy">조회수 3.9M · 2026.06.15</p>
             <div class="ordinary-actions"><span>좋아요</span><span>공유</span><span>저장</span><span>클립</span></div>
           </section>
@@ -1850,11 +1851,25 @@
       function renderRuptureNeuro() {
         seedNeuroChat();
         if (!runtime.ruptureChatStartedAt) runtime.ruptureChatStartedAt = Date.now();
+        const hasGeneratedChat = state.hall3.neuroChatLog.some((item) => item.type === "markup" || item.who === "generated");
         const viewers = 12400 + ((Date.now() / 1000) | 0) % 220;
+        const viewersText = hasGeneratedChat ? "1 watching" : `${viewers.toLocaleString("ko-KR")} watching`;
         const lines = state.hall3.neuroChatLog.slice(-12).map(renderChatLine).join("");
         return `
           <section class="surface panel">
-            <div class="live-meta"><span class="live-badge">● LIVE ON AIR</span><span>${viewers.toLocaleString("ko-KR")} watching</span></div>
+            <div class="live-meta"><span class="live-badge">● LIVE ON AIR</span><span>${viewersText}</span></div>
+            <div style="height: 10px;"></div>
+            ${renderYoutubeFrame({
+              videoId: config.neuro.youtubeId,
+              playlistId: config.neuro.youtubePlaylistId,
+              start: Number(config.neuro.youtubeStart) || 0,
+              autoplay: false,
+              muted: false,
+              controls: true,
+              immersive: false,
+              blockPan: false,
+              title: "Neuro-sama live archive"
+            })}
             <div style="height: 10px;"></div>
             <div class="chat-log" aria-live="polite">${lines}</div>
             <form class="input-row" data-form="rupture-neuro" style="margin-top: 10px;">
@@ -1878,6 +1893,7 @@
           blockPan = false,
           keepControlsUsable = false,
           title = "YouTube video",
+          iframeId = "",
           soundFallback = false
         } = options || {};
         const origin = location.origin && location.origin !== "null" ? location.origin : config.main.mainPwaUrl;
@@ -1906,7 +1922,7 @@
         const showSoundFallback = soundFallback && !state.media?.soundReady && !state.media?.soundOverlayDismissed;
         return `
           <div class="${frameClass}">
-            <iframe src="${src}" title="${escapeHtmlAttr(title)}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>
+            <iframe ${iframeId ? `id="${escapeHtmlAttr(iframeId)}"` : ""} src="${src}" title="${escapeHtmlAttr(title)}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>
             ${blockPan ? `<div class="${shieldClass}" aria-hidden="true"></div>` : ""}
             ${showSoundFallback ? `<button class="sound-overlay" type="button" data-action="retry-sound">화면을 한 번 눌러 소리 켜기</button>` : ""}
           </div>
@@ -1940,6 +1956,21 @@
           `;
           return;
         }
+        if (shouldShowMediaPrompt()) {
+          root.innerHTML = `
+            <div class="modal-backdrop">
+              <div class="modal" role="dialog" aria-modal="true">
+                <h2 class="panel-title">체험 준비가 필요합니다</h2>
+                <p class="small-copy">정상적인 체험을 위해 진동, 사운드, 알림 허용이 필요합니다.</p>
+                <div class="modal-actions">
+                  <button class="action-btn" data-action="media-permission-yes">YES · 허용하고 시작</button>
+                  <button class="action-btn secondary" data-action="media-permission-no">NO · 나중에 하기</button>
+                </div>
+              </div>
+            </div>
+          `;
+          return;
+        }
         if (!runtime.modalOpen) {
           root.innerHTML = "";
           return;
@@ -1956,6 +1987,14 @@
             </div>
           </div>
         `;
+      }
+
+      function shouldShowMediaPrompt() {
+        return state.phase === "normal" &&
+          state.currentHall === 2 &&
+          !state.media?.promptAnswered &&
+          !runtime.modalOpen &&
+          !runtime.transition;
       }
 
       function renderPopup() {
@@ -2040,8 +2079,21 @@
           runtime.modalOpen = false;
           render();
         }
-        if (action.dataset.action === "prepare-media") prepareMediaFeatures();
+        if (action.dataset.action === "media-permission-yes") prepareMediaFeatures();
+        if (action.dataset.action === "media-permission-no") {
+          state.media = state.media || {};
+          state.media.promptAnswered = true;
+          state.media.permissionDeclined = true;
+          state.media.message = "";
+          saveState();
+          render();
+        }
         if (action.dataset.action === "retry-sound") retrySoundPlayback();
+        if (action.dataset.action === "play-rupture-miku") {
+          state.hall3.ruptureMikuPlaying = true;
+          saveState();
+          renderHall();
+        }
         if (action.dataset.action === "exit-focus") {
           state.hall3.focusMode = "both";
           saveState();
@@ -2115,11 +2167,25 @@
         if (button === "B") {
           const icon = TAMA_ICONS[state.tama.selectedIconIndex];
           resolveTamaNeed(icon);
+          return;
         }
         if (button === "C") {
           restoreTamaRequestSoon();
         }
+        refreshAfterTamaChange({ refocusNeuro: true });
+      }
+
+      function isNeuroLiveVisible() {
+        return state.phase === "normal" && state.currentHall === 3 && state.hall3.neuroLive;
+      }
+
+      function refreshAfterTamaChange({ refocusNeuro = false } = {}) {
         saveState();
+        if (isNeuroLiveVisible()) {
+          renderPopup();
+          updateNeuroChatLog({ refocus: refocusNeuro });
+          return;
+        }
         render();
       }
 
@@ -2130,23 +2196,20 @@
           state.tama.displayMessage = config.tamagotchi.successMessage || "( ≧ ◡ ≦ )";
           state.tama.displayMode = "success";
           state.tama.lastCareAction = icon.toLowerCase();
-          saveState();
-          render();
+          refreshAfterTamaChange({ refocusNeuro: true });
           setTimeout(() => {
             if (state.phase !== "normal") return;
             state.tama.currentNeed = randomTamaNeed();
             state.tama.displayMessage = tamaRequestText(state.tama.currentNeed);
             state.tama.displayMode = "request";
-            saveState();
-            render();
+            refreshAfterTamaChange({ refocusNeuro: true });
           }, 1000);
           return;
         }
         state.tama.happy = clamp(state.tama.happy - 1, 0, 5);
         state.tama.displayMessage = config.tamagotchi.wrongMessage || "그게 아니야!";
         state.tama.displayMode = "wrong";
-        saveState();
-        render();
+        refreshAfterTamaChange({ refocusNeuro: true });
         restoreTamaRequestSoon();
       }
 
@@ -2155,8 +2218,7 @@
           if (state.phase !== "normal") return;
           state.tama.displayMessage = tamaRequestText(state.tama.currentNeed);
           state.tama.displayMode = "request";
-          saveState();
-          render();
+          refreshAfterTamaChange({ refocusNeuro: true });
         }, 1000);
       }
 
@@ -2197,8 +2259,7 @@
             state.tama.popupMessage = "";
             state.tama.popupResolved = false;
             state.tama.popupFeedback = "";
-            saveState();
-            render();
+            refreshAfterTamaChange({ refocusNeuro: true });
           }, 1000);
           return;
         }
@@ -2214,8 +2275,7 @@
           state.tama.popupMessage = "";
           state.tama.popupResolved = false;
           state.tama.popupFeedback = "";
-          saveState();
-          render();
+          refreshAfterTamaChange({ refocusNeuro: true });
         }, 1000);
       }
 
@@ -2241,9 +2301,12 @@
         state.media.vibrationReady = vibrateDevice([60, 30, 60]);
         state.media.soundReady = await unlockAudio();
         state.media.ready = true;
+        state.media.promptAnswered = true;
+        state.media.permissionDeclined = false;
         state.media.message = `진동 및 사운드 준비 완료. ${config.push?.enableWebPush && !pushReady ? "알림 연결은 브라우저/서버 설정에 따라 실패할 수 있습니다. " : ""}브라우저 정책상 소리가 막히면 화면을 한 번 눌러주세요.`;
         try {
           localStorage.setItem("mediaReady", "true");
+          localStorage.setItem("mediaPromptAnswered", "true");
           localStorage.setItem("soundReady", String(state.media.soundReady));
           localStorage.setItem("vibrationReady", String(state.media.vibrationReady));
         } catch (err) {
@@ -2357,6 +2420,26 @@
         }));
       }
 
+      function neuroVisibleChatLines() {
+        return state.hall3.neuroChatLog
+          .filter((item) => item.type !== "markup" && item.type !== "system")
+          .slice(-9)
+          .map(renderChatLine)
+          .join("");
+      }
+
+      function updateNeuroChatLog({ refocus = false } = {}) {
+        const log = document.querySelector(".neuro-chat-log");
+        if (log) {
+          log.innerHTML = neuroVisibleChatLines();
+          log.scrollTop = log.scrollHeight;
+        }
+        if (refocus) {
+          const input = document.querySelector(".neuro-chat-input");
+          if (input) input.focus({ preventScroll: true });
+        }
+      }
+
       function addNeuroAutoChat() {
         const normalLive = state.phase === "normal" && state.currentHall === 3 && state.hall3.neuroLive;
         const ruptureLive = state.phase === "rupture" && state.currentHall === 3 && state.hall3.ruptureActiveTab === "neuro";
@@ -2376,7 +2459,11 @@
         }
         state.hall3.neuroChatLog = state.hall3.neuroChatLog.slice(-(Number(config.neuro.maxChatLines) || 80));
         saveState();
-        renderHall();
+        if (normalLive) {
+          updateNeuroChatLog();
+        } else {
+          renderHall();
+        }
       }
 
       function shouldAppendMarkupLine() {
@@ -2389,15 +2476,16 @@
 
       function sendNeuroMessage(message) {
         state.hall3.neuroChatLog.push({ who: "you", text: message });
+        updateNeuroChatLog({ refocus: true });
         const reaction = config.neuro.neuroLines[Math.floor(Math.random() * config.neuro.neuroLines.length)];
         setTimeout(() => {
           state.hall3.neuroChatLog.push({ who: "Neuro-sama", text: reaction });
           state.hall3.neuroChatLog = state.hall3.neuroChatLog.slice(-36);
           saveState();
-          render();
+          updateNeuroChatLog({ refocus: true });
         }, 650);
         saveState();
-        render();
+        updateNeuroChatLog({ refocus: true });
       }
 
       async function sendRashomonMessage(message) {
@@ -2406,7 +2494,7 @@
         const cleanMessage = String(message || "").trim().slice(0, Number(config.llm.maxInputChars) || 300);
         if (!cleanMessage) return;
         const rashomon = state.hall4.rashomon;
-        const maxTurns = Number(rashomon.maxTurns) || Number(config.llm?.rashomon?.maxTurns) || 20;
+        const maxTurns = Number(rashomon.maxTurns) || Number(config.llm?.rashomon?.maxTurns) || 10;
         if (state.phase === "normal" && (rashomon.completedNormal || rashomon.turnCount >= maxTurns)) return;
 
         runtime.chatBusy = true;
@@ -2439,11 +2527,13 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body)
           });
+          if (!res.ok) throw new Error(`Rashomon API HTTP ${res.status}`);
           const data = await res.json();
           currentHall4Messages().push({ role: "assistant", text: data.reply || rashomonFallbackReply() });
           applyRashomonResponse(data);
         } catch (err) {
-          currentHall4Messages().push({ role: "assistant", text: rashomonFallbackReply() });
+          console.error("rashomon chat failed", err);
+          currentHall4Messages().push({ role: "assistant", text: "응답 연결이 불안정합니다. 다시 시도해 주세요." });
         } finally {
           runtime.chatBusy = false;
           runtime.cooldownUntil = Date.now() + (Number(config.llm.chatCooldownMs) || 1000);
@@ -2498,9 +2588,9 @@
 
       function rashomonFallbackReply() {
         if (state.phase === "rupture") {
-          return "다시 오셨군요. 어제 당신은 제 말을 믿겠다고 했던 것 같은데요. 이상합니다. 제 기억과 당신의 기억이 조금 다른가 봅니다.";
+          return "다시 오셨군요. 재판 뒤에도 마음이 편치 않았습니다. 오늘은 그 뒤의 이야기를 나눠 보지요.";
         }
-        if ((state.hall4.rashomon?.turnCount || 0) >= (state.hall4.rashomon?.maxTurns || 20)) {
+        if ((state.hall4.rashomon?.turnCount || 0) >= (state.hall4.rashomon?.maxTurns || 10)) {
           return "이제 당신의 추측을 들려줄 차례입니다. 이 사건에서 가장 믿기 어려운 말은 누구의 말이었습니까?";
         }
         return "저는 숲에서 본 것을 다 말했다고 생각했는데… 자꾸 빠진 장면이 떠오릅니다. 당신은 누구의 말이 가장 이상하다고 보십니까?";
@@ -2586,6 +2676,7 @@
         state.hall3.mikuMode = "youtube";
         state.hall3.neuroMode = "generatedLog";
         state.hall3.ruptureActiveTab = "miku";
+        state.hall3.ruptureMikuPlaying = false;
         runtime.ruptureChatStartedAt = null;
         runtime.transition = true;
         stopTamagotchiLoop();

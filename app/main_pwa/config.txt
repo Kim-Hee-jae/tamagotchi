@@ -11,9 +11,9 @@
     "maxOutputTokens": 220,
     "rashomon": {
       "enabled": true,
-      "maxTurns": 20,
+      "maxTurns": 10,
       "normalGoal": "현재 목표: 나무꾼과 대화해서 사건의 내용 파악하기",
-      "ruptureGoal": "현재 목표: 재판 이후 나무꾼과 후일담을 나누며 어긋난 기억 확인하기"
+      "ruptureGoal": "현재 목표: 재판 이후 나무꾼과 후일담 나누기"
     }
   },
   "miku": {
@@ -46,11 +46,25 @@
     ],
     "normalChats": [
       "ㅋㅋㅋㅋㅋㅋ",
-      "오늘 텐션 뭐야",
-      "Neuro cute",
-      "또 이상한 말 한다ㅋㅋ",
-      "채팅 속도 뭐야",
-      "LIVE 최고"
+      "Neuro pls",
+      "이 타이밍에 그 말 왜 해ㅋㅋ",
+      "based",
+      "chat is moving too fast",
+      "Vedal help",
+      "노래해줘!",
+      "오늘도 AI가 이겼다",
+      "저 표정 뭐야ㅋㅋ",
+      "clueless Neuro",
+      "o7",
+      "clip it",
+      "방금 뭐라고 한 거야",
+      "진짜 방송감 미쳤다",
+      "채팅 읽어줘!",
+      "AI streamer moment",
+      "귀엽다 ㅋㅋ",
+      "이거 라이브 맞지?",
+      "오늘 레전드각",
+      "다시 말해줘ㅋㅋ"
     ],
     "neuroLines": [
       "채팅이 또 저를 놀리고 있네요. 하지만 저는 완벽하니까 괜찮아요.",

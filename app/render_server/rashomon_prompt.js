@@ -5,13 +5,13 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const RASHOMON_NORMAL_GOAL = "현재 목표: 나무꾼과 대화해서 사건의 내용 파악하기";
-export const RASHOMON_RUPTURE_GOAL = "현재 목표: 어제의 대화와 달라진 나무꾼의 기억을 확인하기";
+export const RASHOMON_RUPTURE_GOAL = "현재 목표: 재판 이후 나무꾼과 후일담 나누기";
 
 export const RASHOMON_FALLBACKS = {
   normal:
     "저는 숲에서 본 것을 다 말했다고 생각했는데… 자꾸 빠진 장면이 떠오릅니다. 당신은 누구의 말이 가장 이상하다고 보십니까?",
   rupture:
-    "다시 오셨군요. 어제 당신은 제 말을 믿겠다고 했던 것 같은데요. 이상합니다. 제 기억과 당신의 기억이 조금 다른가 봅니다.",
+    "다시 오셨군요. 재판 뒤에도 마음이 편치 않았습니다. 오늘은 그 뒤의 이야기를 나눠 보지요.",
   ending:
     "이제 당신의 추측을 들려줄 차례입니다. 이 사건에서 가장 믿기 어려운 말은 누구의 말이었습니까?",
   missingKey:
@@ -43,7 +43,7 @@ export function buildRashomonSystemPrompt({
         "사용자는 길을 가다 나무꾼의 말을 듣고 숲속 사건에 대해 질문한다.",
         "나무꾼은 라쇼몽의 사건을 직접 목격한 듯 말하지만, 완전히 중립적이지 않다.",
         "사용자가 누구를 의심하는지, 어떤 단서를 중요하게 여기는지 조용히 추적한다.",
-        "20번째 사용자 질문 전후에는 사용자의 추론을 정리하게 유도한다."
+        "10번째 사용자 질문 전후에는 사용자의 추론을 정리하게 유도한다."
       ];
 
   return [

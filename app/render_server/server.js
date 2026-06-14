@@ -122,7 +122,7 @@ app.post("/api/rashomon/chat", async (req, res) => {
   const recentMessages = sanitizeRashomonRecentMessages(body.recentMessages);
   const rashomonMemory = sanitizeRashomonMemory(body.rashomonMemory);
   const turnCount = clampNumber(body.turnCount, 0, 50);
-  const maxTurns = clampNumber(body.maxTurns, 1, 50) || 20;
+  const maxTurns = clampNumber(body.maxTurns, 1, 50) || 10;
   const maxOutputTokens = clampNumber(body.maxOutputTokens, 220, 800) || 420;
 
   if (!message) {
