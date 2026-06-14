@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export const RASHOMON_NORMAL_GOAL = "현재 목표: 나무꾼과 대화해서 사건의 내용 파악하기";
+export const RASHOMON_NORMAL_GOAL = "현재 목표: 나무꾼과 대화해서 사건의 내용 파악하고 산적에게 불리한 증언을 하도록 설득하기";
 export const RASHOMON_RUPTURE_GOAL = "현재 목표: 재판 이후 나무꾼과 후일담 나누기";
 
 export const RASHOMON_FALLBACKS = {
