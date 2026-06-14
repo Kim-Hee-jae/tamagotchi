@@ -105,7 +105,7 @@
       ]
     },
     tamagotchi: {
-      popupIntervalMs: 20000,
+      popupIntervalMs: 40000,
       vibrationPattern: [80, 40, 80],
       popupTitle: "TAMAGOTCHI",
       popupBody: "TAMAGOTCHI가 부르고 있습니다.",

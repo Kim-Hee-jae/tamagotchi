@@ -1279,6 +1279,7 @@
           rashomon: {
             turnCount: 0,
             maxTurns: 10,
+            pendingMessage: "",
             initializedNormal: false,
             initializedRupture: false,
             completedNormal: false,
@@ -1426,7 +1427,16 @@
         if (typeof state.hall4.rashomon.turnCount !== "number") {
           state.hall4.rashomon.turnCount = Math.max(0, state.hall4.normalMessages.filter((item) => item.role === "user").length);
         }
+        state.hall4.rashomon.turnCount = normalizeHall4TurnCount(state.hall4.rashomon.turnCount);
+        state.hall4.rashomon.pendingMessage = state.hall4.rashomon.pendingMessage || "";
         state.hall4.rashomon.finalAnswer = state.hall4.rashomon.finalAnswer || "";
+        if (
+          state.phase === "normal" &&
+          state.hall4.rashomon.turnCount >= state.hall4.rashomon.maxTurns &&
+          !state.hall4.rashomon.finalAnswerSubmitted
+        ) {
+          state.hall4.rashomon.awaitingFinalAnswer = true;
+        }
         if (
           state.hall4.rashomon.completedNormal &&
           !state.hall4.rashomon.finalAnswerSubmitted &&
@@ -1442,6 +1452,13 @@
           (state.hall4.rashomon.completedNormal && state.hall4.rashomon.finalAnswer)
         );
         syncHall4LegacyMessages();
+      }
+
+      function normalizeHall4TurnCount(value) {
+        const maxTurns = Number(state.hall4?.rashomon?.maxTurns) || Number(config.llm?.rashomon?.maxTurns) || 10;
+        const numeric = Number(value);
+        const count = Number.isFinite(numeric) ? numeric : 0;
+        return Math.max(0, Math.min(maxTurns, count));
       }
 
       function ensureHall4NormalIntro() {
@@ -1464,16 +1481,15 @@
 
       function ensureHall4RuptureIntro() {
         ensureHall4State();
-        if (state.hall4.rashomon.initializedRupture && state.hall4.ruptureMessages.length) return;
+        const fixedIntro = hall4RuptureOpening();
+        const startsWithFixedIntro =
+          state.hall4.ruptureMessages[0]?.role === "assistant" &&
+          state.hall4.ruptureMessages[0]?.text === fixedIntro;
+        if (state.hall4.rashomon.initializedRupture && startsWithFixedIntro) return;
         state.hall4.ruptureMessages = [
-          { role: "system", text: "--- 다음날 ---" },
-          {
-            role: "system",
-            text: "당신은 재판과 후일담을 지나 다시 나무꾼에게 돌아옵니다. 나무꾼과 차분히 후일담을 나누세요."
-          },
           {
             role: "assistant",
-            text: hall4RuptureOpening()
+            text: fixedIntro
           }
         ];
         state.hall4.rashomon.initializedRupture = true;
@@ -1483,36 +1499,7 @@
       }
 
       function hall4RuptureOpening() {
-        const distortedSummary = distortedHall4MemoryLine();
-        return [
-          "다시 오셨군요. 어제는 이야기를 오래 붙잡았지요.",
-          "",
-          `"왜곡된 대화 내용: ${distortedSummary}"`,
-          "",
-          "그 말 때문에 저는 재판장에서 다시 진술했습니다. 그 뒤에 어떤 일이 남았는지 이야기해 보겠습니다."
-        ].join("\n");
-      }
-
-      function distortedHall4MemoryLine() {
-        const rashomon = state.hall4.rashomon || {};
-        const candidates = [
-          ...(Array.isArray(rashomon.distortionPlan) ? rashomon.distortionPlan : []),
-          ...(Array.isArray(rashomon.distortionCandidates) ? rashomon.distortionCandidates : []),
-          ...(Array.isArray(rashomon.userSuspicions) ? rashomon.userSuspicions : []),
-          ...(Array.isArray(rashomon.userBeliefs) ? rashomon.userBeliefs : []),
-          ...(Array.isArray(rashomon.sharedClues) ? rashomon.sharedClues : [])
-        ].map((item) => String(item || "").trim()).filter(Boolean);
-        const theory = String(rashomon.userTheory || "").trim();
-        if (theory) {
-          return `${theory.slice(0, 44)}라는 말씀, 재판장에서 아주 도움 되었습니다!`;
-        }
-        if (candidates.length) {
-          return `${candidates[0].slice(0, 44)}라는 말씀, 재판장에서 아주 도움 되었습니다!`;
-        }
-        if (state.hall4.memorySummary) {
-          return "산적의 말이 잘못되었다는 말씀, 아주 도움 되었습니다!";
-        }
-        return "당신이 제 진술을 믿어 주겠다는 말씀, 아주 도움 되었습니다!";
+        return "다시 오셨군요. 어제는 이야기를 오래 붙잡았지요. 당신과 대화가 재판에서의 증언에 도움이 되었습니다!";
       }
 
       function currentHall4Messages() {
@@ -1892,10 +1879,10 @@
         const remaining = Math.max(0, maxTurns - (Number(state.hall4.rashomon.turnCount) || 0));
         if (state.phase === "rupture") {
           return [
-            "재판 뒤에는 무엇이 남았나요?",
-            "정말 시체를 처음 봤나요?",
-            "재판 뒤에 무엇이 떠올랐나요?",
-            "무엇을 숨기고 있나요?"
+            "누가 범인이었나요?",
+            "그게 사실인가요?",
+            "제가 그렇게 말을 했나요?",
+            "전 그런적 없는데요.."
           ];
         }
         if (remaining <= 4) {
@@ -2909,15 +2896,12 @@
 
         runtime.chatBusy = true;
         const messages = currentHall4Messages();
+        rashomon.pendingMessage = cleanMessage;
         messages.push({ role: "user", text: cleanMessage });
         let reachedQuestionLimit = false;
-        if (state.phase === "normal") {
-          rashomon.turnCount = Math.min(maxTurns, (Number(rashomon.turnCount) || 0) + 1);
-          reachedQuestionLimit = rashomon.turnCount >= maxTurns;
-          if (reachedQuestionLimit) {
-            rashomon.awaitingFinalAnswer = true;
-          }
-        }
+        const pendingTurnCount = state.phase === "normal"
+          ? Math.min(maxTurns, (Number(rashomon.turnCount) || 0) + 1)
+          : Number(rashomon.turnCount) || 0;
         rashomon.lastPhase = state.phase;
         syncHall4LegacyMessages();
         saveState();
@@ -2932,10 +2916,11 @@
           memorySummary: state.hall4.memorySummary,
           recentMessages: currentHall4Messages().slice(-8),
           rashomonMemory: rashomonMemoryPayload(),
-          turnCount: rashomon.turnCount,
+          turnCount: pendingTurnCount,
           maxTurns
         };
 
+        let requestSucceeded = false;
         try {
           const res = await fetch(`${config.main.apiBase}/api/rashomon/chat`, {
             method: "POST",
@@ -2944,6 +2929,11 @@
           });
           if (!res.ok) throw new Error(`Rashomon API HTTP ${res.status}`);
           const data = await res.json();
+          requestSucceeded = true;
+          if (state.phase === "normal") {
+            rashomon.turnCount = pendingTurnCount;
+            reachedQuestionLimit = rashomon.turnCount >= maxTurns;
+          }
           if (data.fallback === true) {
             console.warn("Rashomon fallback response", data);
             const debugTag = data.fallbackType ? `\n[debug: ${data.fallbackType}]` : "\n[debug: fallback]";
@@ -2956,9 +2946,10 @@
           console.error("rashomon chat failed", err);
           currentHall4Messages().push({ role: "assistant", text: "응답 연결이 불안정합니다. 다시 시도해 주세요." });
         } finally {
+          rashomon.pendingMessage = "";
           runtime.chatBusy = false;
           runtime.cooldownUntil = Date.now() + (Number(config.llm.chatCooldownMs) || 1000);
-          if (state.phase === "normal" && reachedQuestionLimit && !rashomon.finalAnswerSubmitted) {
+          if (requestSucceeded && state.phase === "normal" && reachedQuestionLimit && !rashomon.finalAnswerSubmitted) {
             const currentMessages = currentHall4Messages();
             const finalQuestion = "누구의 말이 진실입니까?";
             const lastMessage = currentMessages[currentMessages.length - 1];
@@ -3017,7 +3008,7 @@
 
       function rashomonFallbackReply() {
         if (state.phase === "rupture") {
-          return "재판장에서는 당신이 짚어 준 말을 근거처럼 붙잡고 다시 진술했습니다. 그 뒤로 남은 일들이 아직 제 목에 걸려 있습니다.";
+          return "이상하네요. 분명 당신은 반대쪽을 짚어 주셨고, 재판에서는 그 사람이 범인으로 잡혀갔습니다. 기억이 조금 흐려지신 건 아닐까요?";
         }
         if ((state.hall4.rashomon?.turnCount || 0) >= (state.hall4.rashomon?.maxTurns || 10)) {
           return "이제 당신의 추측을 들려줄 차례입니다. 이 사건에서 가장 믿기 어려운 말은 누구의 말이었습니까?";
@@ -3119,7 +3110,7 @@
 
       function syncIntervals() {
         const shouldRunTama = state.phase === "normal" && !state.tama.silent;
-        const intervalMs = Number(config.tamagotchi.popupIntervalMs) || 20000;
+        const intervalMs = Number(config.tamagotchi.popupIntervalMs) || 40000;
         if (shouldRunTama && (!runtime.tamaTimer || runtime.tamaTimerMs !== intervalMs)) {
           stopTamagotchiLoop();
           runtime.tamaTimerMs = intervalMs;
