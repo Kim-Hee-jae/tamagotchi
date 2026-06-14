@@ -816,6 +816,7 @@
       .chat-panel {
         height: 380px;
         overflow: auto;
+        overscroll-behavior: contain;
         padding: 12px;
         border: 2px solid var(--line);
         border-radius: var(--radius);
@@ -823,7 +824,7 @@
           linear-gradient(90deg, rgba(26, 165, 156, 0.06), transparent),
           #fffef9;
         display: grid;
-        align-content: end;
+        align-content: start;
         gap: 10px;
       }
 
@@ -1578,6 +1579,15 @@
         renderPopup();
         syncIntervals();
         mountMiku360Soon();
+        scrollHall4ChatToLatest();
+      }
+
+      function scrollHall4ChatToLatest() {
+        if (state.currentHall !== 4) return;
+        requestAnimationFrame(() => {
+          const panel = document.querySelector(".chat-panel");
+          if (panel) panel.scrollTop = panel.scrollHeight;
+        });
       }
 
       function renderHeader() {
@@ -1832,8 +1842,6 @@
         }
         syncHall4LegacyMessages();
         const rashomon = state.hall4.rashomon;
-        const maxTurns = Number(rashomon.maxTurns) || Number(config.llm?.rashomon?.maxTurns) || 10;
-        const remaining = Math.max(0, maxTurns - (Number(rashomon.turnCount) || 0));
         const awaitingFinal = state.phase === "normal" && Boolean(rashomon.awaitingFinalAnswer);
         const completed = state.phase === "normal" && Boolean(rashomon.finalAnswerSubmitted);
         const messages = currentHall4Messages()
@@ -1844,7 +1852,6 @@
           .join("");
         const disabled = runtime.chatBusy || Date.now() < runtime.cooldownUntil || completed ? "disabled" : "";
         const suggestionDisabled = disabled || awaitingFinal ? "disabled" : "";
-        const countText = awaitingFinal ? "최종 답변 입력" : `남은 질문: ${remaining} / ${maxTurns}`;
         const suggestions = hall4Suggestions().map((item) => `
           <button type="button" data-rashomon-suggest="${escapeHtmlAttr(item)}" ${suggestionDisabled}>${escapeHtml(item)}</button>
         `).join("");
@@ -1854,7 +1861,6 @@
             <div class="hall4-meta">
               <p class="small-copy"><strong>나무꾼</strong></p>
               <p class="small-copy">${escapeHtml(hall4GoalText())}</p>
-              <p class="small-copy">${state.phase === "normal" ? countText : "다음날 대화"}</p>
             </div>
             <div style="height: 10px;"></div>
             <div class="chat-panel" aria-live="polite">
@@ -2959,8 +2965,6 @@
             rashomon.awaitingFinalAnswer = true;
             rashomon.completedNormal = false;
           }
-          state.hall4.normalMessages = state.hall4.normalMessages.slice(-50);
-          state.hall4.ruptureMessages = state.hall4.ruptureMessages.slice(-40);
           syncHall4LegacyMessages();
           saveState();
           render();
