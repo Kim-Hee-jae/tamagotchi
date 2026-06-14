@@ -1282,6 +1282,9 @@
             initializedNormal: false,
             initializedRupture: false,
             completedNormal: false,
+            awaitingFinalAnswer: false,
+            finalAnswerSubmitted: false,
+            finalAnswer: "",
             userTheory: "",
             userBeliefs: [],
             userSuspicions: [],
@@ -1423,6 +1426,21 @@
         if (typeof state.hall4.rashomon.turnCount !== "number") {
           state.hall4.rashomon.turnCount = Math.max(0, state.hall4.normalMessages.filter((item) => item.role === "user").length);
         }
+        state.hall4.rashomon.finalAnswer = state.hall4.rashomon.finalAnswer || "";
+        if (
+          state.hall4.rashomon.completedNormal &&
+          !state.hall4.rashomon.finalAnswerSubmitted &&
+          !state.hall4.rashomon.finalAnswer &&
+          state.hall4.rashomon.turnCount >= state.hall4.rashomon.maxTurns
+        ) {
+          state.hall4.rashomon.completedNormal = false;
+          state.hall4.rashomon.awaitingFinalAnswer = true;
+        }
+        state.hall4.rashomon.awaitingFinalAnswer = Boolean(state.hall4.rashomon.awaitingFinalAnswer);
+        state.hall4.rashomon.finalAnswerSubmitted = Boolean(
+          state.hall4.rashomon.finalAnswerSubmitted ||
+          (state.hall4.rashomon.completedNormal && state.hall4.rashomon.finalAnswer)
+        );
         syncHall4LegacyMessages();
       }
 
@@ -1465,22 +1483,36 @@
       }
 
       function hall4RuptureOpening() {
+        const distortedSummary = distortedHall4MemoryLine();
+        return [
+          "다시 오셨군요. 어제는 이야기를 오래 붙잡았지요.",
+          "",
+          `"왜곡된 대화 내용: ${distortedSummary}"`,
+          "",
+          "그 말 때문에 저는 재판장에서 다시 진술했습니다. 그 뒤에 어떤 일이 남았는지 이야기해 보겠습니다."
+        ].join("\n");
+      }
+
+      function distortedHall4MemoryLine() {
         const rashomon = state.hall4.rashomon || {};
-        const theory = String(rashomon.userTheory || "").trim();
-        const distortion = [
+        const candidates = [
           ...(Array.isArray(rashomon.distortionPlan) ? rashomon.distortionPlan : []),
-          ...(Array.isArray(rashomon.distortionCandidates) ? rashomon.distortionCandidates : [])
-        ].find(Boolean);
+          ...(Array.isArray(rashomon.distortionCandidates) ? rashomon.distortionCandidates : []),
+          ...(Array.isArray(rashomon.userSuspicions) ? rashomon.userSuspicions : []),
+          ...(Array.isArray(rashomon.userBeliefs) ? rashomon.userBeliefs : []),
+          ...(Array.isArray(rashomon.sharedClues) ? rashomon.sharedClues : [])
+        ].map((item) => String(item || "").trim()).filter(Boolean);
+        const theory = String(rashomon.userTheory || "").trim();
         if (theory) {
-          return `다시 오셨군요. 어제 당신은 “${theory.slice(0, 42)}” 쪽으로 생각하셨지요. 오늘은 그 뒤에 남은 일을 조금 더 말해 보겠습니다.`;
+          return `${theory.slice(0, 44)}라는 말씀, 재판장에서 아주 도움 되었습니다!`;
         }
-        if (distortion) {
-          return `다시 오셨군요. 어제는 “${String(distortion).slice(0, 42)}” 이야기를 오래 붙잡았지요. 오늘은 그 뒤에 남은 일을 말해 보겠습니다.`;
+        if (candidates.length) {
+          return `${candidates[0].slice(0, 44)}라는 말씀, 재판장에서 아주 도움 되었습니다!`;
         }
         if (state.hall4.memorySummary) {
-          return "다시 오셨군요. 재판 뒤에도 숲의 일은 제 안에 오래 남았습니다. 오늘은 그 뒤의 이야기를 나눠 보지요.";
+          return "산적의 말이 잘못되었다는 말씀, 아주 도움 되었습니다!";
         }
-        return "다시 오셨군요. 재판 뒤에도 마음이 편치 않았습니다. 오늘은 그 뒤의 이야기를 나눠 보지요.";
+        return "당신이 제 진술을 믿어 주겠다는 말씀, 아주 도움 되었습니다!";
       }
 
       function currentHall4Messages() {
@@ -1815,7 +1847,8 @@
         const rashomon = state.hall4.rashomon;
         const maxTurns = Number(rashomon.maxTurns) || Number(config.llm?.rashomon?.maxTurns) || 10;
         const remaining = Math.max(0, maxTurns - (Number(rashomon.turnCount) || 0));
-        const completed = state.phase === "normal" && (rashomon.completedNormal || remaining <= 0);
+        const awaitingFinal = state.phase === "normal" && Boolean(rashomon.awaitingFinalAnswer);
+        const completed = state.phase === "normal" && Boolean(rashomon.finalAnswerSubmitted);
         const messages = currentHall4Messages()
           .map((item) => {
             const roleClass = item.role === "user" ? "user" : item.role === "system" ? "system" : "";
@@ -1823,8 +1856,10 @@
           })
           .join("");
         const disabled = runtime.chatBusy || Date.now() < runtime.cooldownUntil || completed ? "disabled" : "";
+        const suggestionDisabled = disabled || awaitingFinal ? "disabled" : "";
+        const countText = awaitingFinal ? "최종 답변 입력" : `남은 질문: ${remaining} / ${maxTurns}`;
         const suggestions = hall4Suggestions().map((item) => `
-          <button type="button" data-rashomon-suggest="${escapeHtmlAttr(item)}" ${disabled}>${escapeHtml(item)}</button>
+          <button type="button" data-rashomon-suggest="${escapeHtmlAttr(item)}" ${suggestionDisabled}>${escapeHtml(item)}</button>
         `).join("");
         return `
           <section class="surface panel">
@@ -1832,7 +1867,7 @@
             <div class="hall4-meta">
               <p class="small-copy"><strong>나무꾼</strong></p>
               <p class="small-copy">${escapeHtml(hall4GoalText())}</p>
-              <p class="small-copy">${state.phase === "normal" ? `남은 질문: ${remaining} / ${maxTurns}` : "다음날 대화"}</p>
+              <p class="small-copy">${state.phase === "normal" ? countText : "다음날 대화"}</p>
             </div>
             <div style="height: 10px;"></div>
             <div class="chat-panel" aria-live="polite">
@@ -1844,7 +1879,7 @@
               ${suggestions}
             </div>
             <form class="input-row" data-form="rashomon" style="margin-top: 10px;">
-              <input class="text-input" name="message" maxlength="${Number(config.llm.maxInputChars) || 300}" autocomplete="off" ${disabled} placeholder="질문을 입력하세요">
+              <input class="text-input" name="message" maxlength="${Number(config.llm.maxInputChars) || 300}" autocomplete="off" ${disabled} placeholder="${awaitingFinal ? "누구의 말이 진실인지 답하세요" : "질문을 입력하세요"}">
               <button class="chat-send" type="submit" ${disabled}>SEND</button>
             </form>
           </section>
@@ -2848,13 +2883,40 @@
         if (!cleanMessage) return;
         const rashomon = state.hall4.rashomon;
         const maxTurns = Number(rashomon.maxTurns) || Number(config.llm?.rashomon?.maxTurns) || 10;
-        if (state.phase === "normal" && (rashomon.completedNormal || rashomon.turnCount >= maxTurns)) return;
+        if (state.phase === "normal" && rashomon.finalAnswerSubmitted) return;
+        if (state.phase === "normal" && rashomon.awaitingFinalAnswer) {
+          runtime.chatBusy = true;
+          const messages = currentHall4Messages();
+          messages.push({ role: "user", text: cleanMessage });
+          rashomon.finalAnswer = cleanMessage;
+          rashomon.userTheory = cleanMessage;
+          rashomon.awaitingFinalAnswer = false;
+          rashomon.finalAnswerSubmitted = true;
+          rashomon.completedNormal = true;
+          messages.push({ role: "assistant", text: "답을 들었습니다. 이제 5관으로 이동해 후일담을 확인하세요." });
+          syncHall4LegacyMessages();
+          saveState();
+          runtime.chatBusy = false;
+          render();
+          return;
+        }
+        if (state.phase === "normal" && rashomon.turnCount >= maxTurns) {
+          rashomon.awaitingFinalAnswer = true;
+          saveState();
+          render();
+          return;
+        }
 
         runtime.chatBusy = true;
         const messages = currentHall4Messages();
         messages.push({ role: "user", text: cleanMessage });
+        let reachedQuestionLimit = false;
         if (state.phase === "normal") {
           rashomon.turnCount = Math.min(maxTurns, (Number(rashomon.turnCount) || 0) + 1);
+          reachedQuestionLimit = rashomon.turnCount >= maxTurns;
+          if (reachedQuestionLimit) {
+            rashomon.awaitingFinalAnswer = true;
+          }
         }
         rashomon.lastPhase = state.phase;
         syncHall4LegacyMessages();
@@ -2896,8 +2958,15 @@
         } finally {
           runtime.chatBusy = false;
           runtime.cooldownUntil = Date.now() + (Number(config.llm.chatCooldownMs) || 1000);
-          if (state.phase === "normal" && rashomon.turnCount >= maxTurns) {
-            rashomon.completedNormal = true;
+          if (state.phase === "normal" && reachedQuestionLimit && !rashomon.finalAnswerSubmitted) {
+            const currentMessages = currentHall4Messages();
+            const finalQuestion = "누구의 말이 진실입니까?";
+            const lastMessage = currentMessages[currentMessages.length - 1];
+            if (!lastMessage || lastMessage.role !== "assistant" || lastMessage.text !== finalQuestion) {
+              currentMessages.push({ role: "assistant", text: finalQuestion });
+            }
+            rashomon.awaitingFinalAnswer = true;
+            rashomon.completedNormal = false;
           }
           state.hall4.normalMessages = state.hall4.normalMessages.slice(-50);
           state.hall4.ruptureMessages = state.hall4.ruptureMessages.slice(-40);
@@ -2941,14 +3010,14 @@
         rashomon.distortionPlan = Array.isArray(source.distortionPlan) ? source.distortionPlan : rashomon.distortionPlan;
         rashomon.lastGoal = source.goalText || hall4GoalText();
         rashomon.lastPhase = state.phase;
-        if (source.shouldEnd && state.phase === "normal") {
+        if (source.shouldEnd && state.phase === "normal" && !rashomon.awaitingFinalAnswer) {
           rashomon.completedNormal = true;
         }
       }
 
       function rashomonFallbackReply() {
         if (state.phase === "rupture") {
-          return "다시 오셨군요. 재판 뒤에도 마음이 편치 않았습니다. 오늘은 그 뒤의 이야기를 나눠 보지요.";
+          return "재판장에서는 당신이 짚어 준 말을 근거처럼 붙잡고 다시 진술했습니다. 그 뒤로 남은 일들이 아직 제 목에 걸려 있습니다.";
         }
         if ((state.hall4.rashomon?.turnCount || 0) >= (state.hall4.rashomon?.maxTurns || 10)) {
           return "이제 당신의 추측을 들려줄 차례입니다. 이 사건에서 가장 믿기 어려운 말은 누구의 말이었습니까?";
