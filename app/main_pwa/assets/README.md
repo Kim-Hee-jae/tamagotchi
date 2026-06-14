@@ -2,17 +2,16 @@
 
 이 폴더에는 전시용 영상 파일을 넣습니다.
 
-## miku360.mp4
+## miku360_eac_source.mp4
 
-- config.txt의 `miku.normalMode`가 `"360"`일 때 사용됩니다.
-- 진짜 360도 equirectangular mp4여야 합니다.
-- 일반 2D 영상을 넣으면 진짜 360도 VR이 되지 않습니다.
-- 권장 해상도: 3840x1920 또는 2560x1280
+- YouTube에서 추출된 EAC / Equi-Angular Cubemap 계열 원본을 보존하는 파일입니다.
+- 앱에서 직접 재생하지 않습니다.
 
-## miku2d.mp4
+## miku360_equirect.mp4
 
-- config.txt의 `miku.normalMode`가 `"theater"`일 때 사용됩니다.
-- 일반 2D 영상을 VR 극장처럼 보여줄 때 사용됩니다.
+- 앱의 3관 미쿠 360도 플레이어가 실제로 사용하는 파일입니다.
+- `scripts/convert_miku360_eac_to_equirect.ps1`로 생성합니다.
+- 2:1 equirectangular mp4여야 합니다.
 
 ## 주의
 

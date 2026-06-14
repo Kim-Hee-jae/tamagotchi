@@ -7,3 +7,8 @@ dist/
 build/
 .cache/
 .netlify/
+**/*.mp4
+**/*.mov
+**/*.webm
+**/*.mkv
+**/*.avi

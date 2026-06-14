@@ -18,6 +18,8 @@
   },
   "miku": {
     "normalMode": "youtube360",
+    "equirectVideoPath": "/assets/miku360_equirect.mp4",
+    "threeModuleUrl": "https://unpkg.com/three@0.160.0/build/three.module.js",
     "youtube360Id": "-bh1AUw5FW8",
     "youtube360Start": 0,
     "ticketTitle": "HATSUNE MIKU VIRTUAL LIVE",

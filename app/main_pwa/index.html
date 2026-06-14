@@ -545,6 +545,90 @@
         overflow: hidden;
       }
 
+      .miku360-shell {
+        position: relative;
+        width: 100%;
+        min-height: min(72dvh, 640px);
+        background: #000;
+        overflow: hidden;
+        touch-action: none;
+      }
+
+      .fullscreen-miku .miku360-shell {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        min-height: 100dvh;
+      }
+
+      .miku360-canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .miku360-video {
+        display: none;
+      }
+
+      .miku360-hud {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        bottom: max(12px, env(safe-area-inset-bottom));
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        color: #fff;
+        font-size: 0.76rem;
+        font-weight: 800;
+        pointer-events: none;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75);
+      }
+
+      .miku360-status {
+        max-width: 78%;
+        line-height: 1.35;
+      }
+
+      .miku360-entry,
+      .media-entry {
+        position: absolute;
+        inset: 0;
+        z-index: 4;
+        display: grid;
+        place-items: center;
+        padding: 18px;
+        background: rgba(0, 0, 0, 0.72);
+        color: #fff;
+        text-align: center;
+      }
+
+      .miku360-entry-box,
+      .media-entry-box {
+        width: min(100%, 340px);
+        display: grid;
+        gap: 12px;
+      }
+
+      .miku360-entry-box h2,
+      .media-entry-box h2 {
+        margin: 0;
+        font-size: 1.08rem;
+      }
+
+      .miku360-entry-box p,
+      .media-entry-box p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.82);
+        line-height: 1.5;
+        font-size: 0.88rem;
+      }
+
       .fullscreen-miku .youtube-frame,
       .youtube-frame.fullscreen {
         position: absolute;
@@ -638,6 +722,13 @@
 
       .iframe-shield.pan-lock {
         bottom: 56px;
+      }
+
+      .youtube-touch-blocker {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        background: transparent;
       }
 
       .sound-overlay {
@@ -800,6 +891,16 @@
       .ordinary-video-meta {
         display: grid;
         gap: 10px;
+      }
+
+      .ordinary-miku-video {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        display: block;
+        border: 2px solid var(--line);
+        border-radius: var(--radius);
+        background: #050505;
+        object-fit: cover;
       }
 
       .ordinary-title {
@@ -1157,6 +1258,13 @@
           mikuMode: "locked",
           neuroMode: "locked",
           focusMode: "both",
+          mikuExperienceReady: false,
+          mikuEntryPromptOpen: false,
+          mikuGyroEnabled: false,
+          mikuGestureFallback: true,
+          mikuStatusMessage: "",
+          neuroExperienceReady: false,
+          neuroEntryPromptOpen: false,
           ruptureMikuPlaying: false,
           ruptureActiveTab: "miku",
           mikuCheerLog: [],
@@ -1196,6 +1304,8 @@
         tamaTimerMs: 0,
         neuroTimer: null,
         neuroTimerMs: 0,
+        miku360: null,
+        mikuThreePromise: null,
         chatBusy: false,
         cooldownUntil: 0,
         cheers: [],
@@ -1267,6 +1377,8 @@
           state.hall3.mikuTicket = true;
           state.hall3.mikuMode = "youtube360";
           state.hall3.focusMode = "miku";
+          state.hall3.mikuExperienceReady = false;
+          state.hall3.mikuEntryPromptOpen = true;
           saveState();
         }
         if (mode === "neuro") {
@@ -1275,6 +1387,8 @@
           state.hall3.neuroLive = true;
           state.hall3.neuroMode = "live";
           state.hall3.focusMode = "neuro";
+          state.hall3.neuroExperienceReady = false;
+          state.hall3.neuroEntryPromptOpen = true;
           seedNeuroChat();
           saveState();
         }
@@ -1444,6 +1558,7 @@
         renderModal();
         renderPopup();
         syncIntervals();
+        mountMiku360Soon();
       }
 
       function renderHeader() {
@@ -1560,17 +1675,7 @@
         return `
           <section class="fullscreen-miku" aria-label="Hatsune Miku 360 fullscreen">
             <button class="fullscreen-back-btn" type="button" data-action="exit-focus">← 3관</button>
-            ${renderYoutubeFrame({
-              videoId: config.miku.youtube360Id || "-bh1AUw5FW8",
-              start: Number(config.miku.youtube360Start) || 0,
-              autoplay: true,
-              muted: !state.media?.soundReady,
-              controls: false,
-              fullscreen: true,
-              blockPan: false,
-              soundFallback: true,
-              title: "Hatsune Miku 360 concert"
-            })}
+            ${renderMiku360Player({ fullscreen: true })}
           </section>
         `;
       }
@@ -1614,19 +1719,31 @@
       }
 
       function renderMikuStage() {
+        return renderMiku360Player({ fullscreen: false });
+      }
+
+      function renderMiku360Player({ fullscreen = false } = {}) {
+        const ready = Boolean(state.hall3.mikuExperienceReady);
+        const status = state.hall3.mikuStatusMessage ||
+          (state.hall3.mikuGyroEnabled ? "자이로센서로 시점을 움직입니다." : "자이로센서가 꺼져 있어 손가락으로 화면을 움직일 수 있습니다.");
+        const src = config.miku.equirectVideoPath || "/assets/miku360_equirect.mp4";
         return `
-          <div class="miku-stage">
-            ${renderYoutubeFrame({
-              videoId: config.miku.youtube360Id || "-bh1AUw5FW8",
-              start: Number(config.miku.youtube360Start) || 0,
-              autoplay: true,
-              muted: !state.media?.soundReady,
-              controls: false,
-              immersive: true,
-              blockPan: false,
-              title: "Hatsune Miku 360 concert",
-              soundFallback: true
-            })}
+          <div class="miku-stage miku360-shell ${fullscreen ? "fullscreen" : ""}" data-miku360="${ready ? "ready" : "locked"}">
+            <canvas class="miku360-canvas" aria-label="Hatsune Miku 360 video"></canvas>
+            <video class="miku360-video" src="${escapeHtmlAttr(src)}" playsinline webkit-playsinline crossorigin="anonymous" loop preload="auto"></video>
+            <div class="miku360-hud">
+              <span class="miku360-status">${escapeHtml(status)}</span>
+              <span>360 VIDEO</span>
+            </div>
+            ${ready ? "" : `
+              <div class="miku360-entry">
+                <div class="miku360-entry-box">
+                  <h2>콘서트 입장하기</h2>
+                  <p>정상적인 360도 콘서트 체험을 위해 영상 재생, 전체화면, 자이로센서 권한이 필요합니다.</p>
+                  <button class="action-btn" type="button" data-action="enter-miku360">입장하기</button>
+                </div>
+              </div>
+            `}
           </div>
         `;
       }
@@ -1638,6 +1755,18 @@
               <div>
                 <h2 class="panel-title">Neuro-sama LIVE</h2>
                 <p class="small-copy">${escapeHtml(config.neuro.waitingMessage || "아직 방송이 시작되지 않았습니다.")}<br>3관의 뉴로사마 QR을 스캔하세요.</p>
+              </div>
+            </section>
+          `;
+        }
+
+        if (!state.hall3.neuroExperienceReady) {
+          return `
+            <section class="surface panel media-entry" style="position: relative; min-height: 360px;">
+              <div class="media-entry-box">
+                <h2>뉴로사마 라이브 시청하기</h2>
+                <p>정상적인 체험을 위해 영상과 소리가 재생됩니다.</p>
+                <button class="action-btn" type="button" data-action="enter-neuro-live">라이브 입장하기</button>
               </div>
             </section>
           `;
@@ -1660,7 +1789,7 @@
               muted: !state.media?.soundReady,
               controls: false,
               immersive: false,
-              blockPan: false,
+              blockPan: true,
               title: "Neuro-sama live",
               iframeId: "neuro-live-iframe",
               soundFallback: true
@@ -1827,20 +1956,11 @@
 
       function renderRuptureMiku() {
         const isPlaying = Boolean(state.hall3.ruptureMikuPlaying);
+        const src = config.miku.equirectVideoPath || "/assets/miku360_equirect.mp4";
         return `
           <section class="surface panel ordinary-video-meta">
             <h2 class="ordinary-title">Hatsune Miku Concert Video</h2>
-            ${renderYoutubeFrame({
-              videoId: config.miku.youtube360Id || "-bh1AUw5FW8",
-              start: Number(config.miku.youtube360Start) || 0,
-              autoplay: isPlaying,
-              muted: false,
-              controls: true,
-              immersive: false,
-              blockPan: isPlaying,
-              keepControlsUsable: true,
-              title: "Hatsune Miku concert archive"
-            })}
+            <video class="ordinary-miku-video" src="${escapeHtmlAttr(src)}" controls playsinline webkit-playsinline ${isPlaying ? "autoplay" : ""}></video>
             ${isPlaying ? "" : `<button class="action-btn" type="button" data-action="play-rupture-miku">재생하기</button>`}
             <p class="small-copy">조회수 3.9M · 2026.06.15</p>
             <div class="ordinary-actions"><span>좋아요</span><span>공유</span><span>저장</span><span>클립</span></div>
@@ -1851,13 +1971,11 @@
       function renderRuptureNeuro() {
         seedNeuroChat();
         if (!runtime.ruptureChatStartedAt) runtime.ruptureChatStartedAt = Date.now();
-        const hasGeneratedChat = state.hall3.neuroChatLog.some((item) => item.type === "markup" || item.who === "generated");
-        const viewers = 12400 + ((Date.now() / 1000) | 0) % 220;
-        const viewersText = hasGeneratedChat ? "1 watching" : `${viewers.toLocaleString("ko-KR")} watching`;
-        const lines = state.hall3.neuroChatLog.slice(-12).map(renderChatLine).join("");
+        const viewersText = ruptureNeuroViewersText();
+        const lines = ruptureNeuroVisibleChatLines();
         return `
           <section class="surface panel">
-            <div class="live-meta"><span class="live-badge">● LIVE ON AIR</span><span>${viewersText}</span></div>
+            <div class="live-meta"><span class="live-badge">● LIVE ON AIR</span><span class="rupture-neuro-viewers">${viewersText}</span></div>
             <div style="height: 10px;"></div>
             ${renderYoutubeFrame({
               videoId: config.neuro.youtubeId,
@@ -1868,12 +1986,13 @@
               controls: true,
               immersive: false,
               blockPan: false,
-              title: "Neuro-sama live archive"
+              title: "Neuro-sama live archive",
+              iframeId: "rupture-neuro-live-iframe"
             })}
             <div style="height: 10px;"></div>
-            <div class="chat-log" aria-live="polite">${lines}</div>
+            <div class="chat-log rupture-neuro-chat-log" aria-live="polite">${lines}</div>
             <form class="input-row" data-form="rupture-neuro" style="margin-top: 10px;">
-              <input class="text-input" name="message" maxlength="80" autocomplete="off" placeholder="chat">
+              <input class="text-input rupture-neuro-chat-input" name="message" maxlength="80" autocomplete="off" placeholder="chat">
               <button class="chat-send" type="submit">SEND</button>
             </form>
           </section>
@@ -1931,6 +2050,207 @@
 
       function isMikuFullscreen() {
         return state.phase === "normal" && state.currentHall === 3 && state.hall3.focusMode === "miku";
+      }
+
+      function mountMiku360Soon() {
+        const shell = document.querySelector(".miku360-shell[data-miku360='ready']");
+        if (!shell) {
+          disposeMiku360Player();
+          return;
+        }
+        requestAnimationFrame(() => initMiku360Player(shell));
+      }
+
+      async function loadThreeModule() {
+        if (window.THREE) return window.THREE;
+        if (!runtime.mikuThreePromise) {
+          runtime.mikuThreePromise = import(config.miku.threeModuleUrl || "https://unpkg.com/three@0.160.0/build/three.module.js")
+            .then((module) => {
+              window.THREE = module;
+              return module;
+            });
+        }
+        return runtime.mikuThreePromise;
+      }
+
+      async function initMiku360Player(shell) {
+        if (runtime.miku360?.shell === shell) return;
+        disposeMiku360Player();
+        const canvas = shell.querySelector(".miku360-canvas");
+        const video = shell.querySelector(".miku360-video");
+        if (!canvas || !video) return;
+        try {
+          const THREE = await loadThreeModule();
+          const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+          const scene = new THREE.Scene();
+          const camera = new THREE.PerspectiveCamera(75, 1, 1, 1100);
+          const geometry = new THREE.SphereGeometry(500, 64, 40);
+          geometry.scale(-1, 1, 1);
+          const texture = new THREE.VideoTexture(video);
+          if ("SRGBColorSpace" in THREE) texture.colorSpace = THREE.SRGBColorSpace;
+          const material = new THREE.MeshBasicMaterial({ map: texture });
+          const mesh = new THREE.Mesh(geometry, material);
+          scene.add(mesh);
+
+          const player = {
+            THREE,
+            shell,
+            video,
+            renderer,
+            scene,
+            camera,
+            geometry,
+            texture,
+            material,
+            frame: 0,
+            lon: 0,
+            lat: 0,
+            dragging: false,
+            lastX: 0,
+            lastY: 0,
+            gyro: null
+          };
+
+          const resize = () => {
+            if (runtime.miku360 !== player) return;
+            const rect = shell.getBoundingClientRect();
+            const width = Math.max(1, Math.floor(rect.width));
+            const height = Math.max(1, Math.floor(rect.height));
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            renderer.setSize(width, height, false);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+          };
+
+          const pointerDown = (event) => {
+            player.dragging = true;
+            player.lastX = event.clientX;
+            player.lastY = event.clientY;
+            shell.setPointerCapture?.(event.pointerId);
+          };
+          const pointerMove = (event) => {
+            if (!player.dragging) return;
+            player.lon -= (event.clientX - player.lastX) * 0.12;
+            player.lat += (event.clientY - player.lastY) * 0.12;
+            player.lat = Math.max(-85, Math.min(85, player.lat));
+            player.lastX = event.clientX;
+            player.lastY = event.clientY;
+          };
+          const pointerUp = () => {
+            player.dragging = false;
+          };
+          const orientation = (event) => {
+            if (!state.hall3.mikuGyroEnabled) return;
+            player.gyro = {
+              alpha: Number(event.alpha) || 0,
+              beta: Number(event.beta) || 0
+            };
+          };
+          const videoError = () => {
+            setMikuStatus("miku360_equirect.mp4를 불러오지 못했습니다. 변환 스크립트를 먼저 실행해 주세요.");
+          };
+
+          shell.addEventListener("pointerdown", pointerDown);
+          shell.addEventListener("pointermove", pointerMove);
+          shell.addEventListener("pointerup", pointerUp);
+          shell.addEventListener("pointercancel", pointerUp);
+          window.addEventListener("resize", resize);
+          window.addEventListener("deviceorientation", orientation, true);
+          video.addEventListener("error", videoError);
+
+          player.cleanup = () => {
+            cancelAnimationFrame(player.frame);
+            shell.removeEventListener("pointerdown", pointerDown);
+            shell.removeEventListener("pointermove", pointerMove);
+            shell.removeEventListener("pointerup", pointerUp);
+            shell.removeEventListener("pointercancel", pointerUp);
+            window.removeEventListener("resize", resize);
+            window.removeEventListener("deviceorientation", orientation, true);
+            video.removeEventListener("error", videoError);
+            texture.dispose();
+            material.dispose();
+            geometry.dispose();
+            renderer.dispose();
+          };
+
+          runtime.miku360 = player;
+          resize();
+          animateMiku360();
+          video.play().catch(() => setMikuStatus("화면을 한 번 더 터치하면 재생됩니다"));
+        } catch (err) {
+          console.error("miku 360 init failed", err);
+          setMikuStatus("360도 플레이어를 불러오지 못했습니다. 네트워크와 Three.js 로드를 확인해 주세요.");
+        }
+      }
+
+      function animateMiku360() {
+        const player = runtime.miku360;
+        if (!player) return;
+        if (player.gyro && state.hall3.mikuGyroEnabled) {
+          player.lon = -player.gyro.alpha;
+          player.lat = Math.max(-85, Math.min(85, player.gyro.beta - 90));
+        }
+        const phi = player.THREE.MathUtils.degToRad(90 - player.lat);
+        const theta = player.THREE.MathUtils.degToRad(player.lon);
+        player.camera.lookAt(
+          500 * Math.sin(phi) * Math.cos(theta),
+          500 * Math.cos(phi),
+          500 * Math.sin(phi) * Math.sin(theta)
+        );
+        player.renderer.render(player.scene, player.camera);
+        player.frame = requestAnimationFrame(animateMiku360);
+      }
+
+      function disposeMiku360Player() {
+        if (!runtime.miku360) return;
+        runtime.miku360.cleanup?.();
+        runtime.miku360 = null;
+      }
+
+      function setMikuStatus(message) {
+        state.hall3.mikuStatusMessage = message;
+        const status = document.querySelector(".miku360-status");
+        if (status) status.textContent = message;
+        saveState();
+      }
+
+      async function enterMiku360Experience() {
+        state.hall3.mikuExperienceReady = true;
+        state.hall3.mikuEntryPromptOpen = false;
+        state.hall3.mikuStatusMessage = "360도 콘서트를 준비하고 있습니다.";
+        saveState();
+        renderHall();
+        const shell = document.querySelector(".miku360-shell");
+        const video = document.querySelector(".miku360-video");
+        if (video) {
+          video.muted = !state.media?.soundReady;
+          video.load();
+          video.play().catch(() => setMikuStatus("화면을 한 번 더 터치하면 재생됩니다"));
+        }
+        if (shell?.requestFullscreen) {
+          shell.requestFullscreen().catch(() => setMikuStatus("전체화면이 차단되었습니다. 화면은 계속 재생됩니다."));
+        }
+        try {
+          const orientationApi = window.DeviceOrientationEvent;
+          if (orientationApi && typeof orientationApi.requestPermission === "function") {
+            const permission = await orientationApi.requestPermission();
+            state.hall3.mikuGyroEnabled = permission === "granted";
+          } else {
+            state.hall3.mikuGyroEnabled = "DeviceOrientationEvent" in window;
+          }
+        } catch (err) {
+          state.hall3.mikuGyroEnabled = false;
+        }
+        state.hall3.mikuGestureFallback = !state.hall3.mikuGyroEnabled;
+        setMikuStatus(state.hall3.mikuGyroEnabled ? "자이로센서로 시점을 움직입니다." : "자이로센서가 꺼져 있어 손가락으로 화면을 움직일 수 있습니다.");
+        mountMiku360Soon();
+      }
+
+      function enterNeuroLiveExperience() {
+        state.hall3.neuroExperienceReady = true;
+        state.hall3.neuroEntryPromptOpen = false;
+        saveState();
+        renderHall();
       }
 
       function renderChatLine(item) {
@@ -2089,6 +2409,8 @@
           render();
         }
         if (action.dataset.action === "retry-sound") retrySoundPlayback();
+        if (action.dataset.action === "enter-miku360") enterMiku360Experience();
+        if (action.dataset.action === "enter-neuro-live") enterNeuroLiveExperience();
         if (action.dataset.action === "play-rupture-miku") {
           state.hall3.ruptureMikuPlaying = true;
           saveState();
@@ -2184,6 +2506,10 @@
         if (isNeuroLiveVisible()) {
           renderPopup();
           updateNeuroChatLog({ refocus: refocusNeuro });
+          return;
+        }
+        if (state.phase === "normal" && state.currentHall === 4) {
+          renderPopup();
           return;
         }
         render();
@@ -2440,6 +2766,33 @@
         }
       }
 
+      function ruptureNeuroVisibleChatLines() {
+        return state.hall3.neuroChatLog
+          .slice(-12)
+          .map(renderChatLine)
+          .join("");
+      }
+
+      function ruptureNeuroViewersText() {
+        const hasGeneratedChat = state.hall3.neuroChatLog.some((item) => item.type === "markup" || item.who === "generated");
+        const viewers = 12400 + ((Date.now() / 1000) | 0) % 220;
+        return hasGeneratedChat ? "1 watching" : `${viewers.toLocaleString("ko-KR")} watching`;
+      }
+
+      function updateRuptureNeuroChat({ refocus = false } = {}) {
+        const log = document.querySelector(".rupture-neuro-chat-log");
+        if (log) {
+          log.innerHTML = ruptureNeuroVisibleChatLines();
+          log.scrollTop = log.scrollHeight;
+        }
+        const viewers = document.querySelector(".rupture-neuro-viewers");
+        if (viewers) viewers.textContent = ruptureNeuroViewersText();
+        if (refocus) {
+          const input = document.querySelector(".rupture-neuro-chat-input");
+          if (input) input.focus({ preventScroll: true });
+        }
+      }
+
       function addNeuroAutoChat() {
         const normalLive = state.phase === "normal" && state.currentHall === 3 && state.hall3.neuroLive;
         const ruptureLive = state.phase === "rupture" && state.currentHall === 3 && state.hall3.ruptureActiveTab === "neuro";
@@ -2462,7 +2815,7 @@
         if (normalLive) {
           updateNeuroChatLog();
         } else {
-          renderHall();
+          updateRuptureNeuroChat();
         }
       }
 
@@ -2635,7 +2988,7 @@
         });
         state.hall3.neuroChatLog = state.hall3.neuroChatLog.slice(-(Number(config.neuro.maxChatLines) || 80));
         saveState();
-        render();
+        updateRuptureNeuroChat({ refocus: true });
       }
 
       function submitExitCard(form) {

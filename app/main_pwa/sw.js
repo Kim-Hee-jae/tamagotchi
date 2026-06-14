@@ -1,4 +1,4 @@
-const CACHE_NAME = "tamagotchi-exhibition-v28";
+const CACHE_NAME = "tamagotchi-exhibition-v30";
 const STATIC_ASSETS = [
   "/",
   "/index.html",
