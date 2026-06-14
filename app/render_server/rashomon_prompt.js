@@ -64,12 +64,14 @@ export function buildRashomonSystemPrompt({
     "",
     "## 응답 JSON 규칙",
     "응답은 반드시 JSON 객체 하나만 반환한다. Markdown 코드블록을 쓰지 않는다.",
+    "모든 문자열은 짧게 쓴다. reply는 1~3문장, memorySummary는 4문장 이하, 배열은 핵심 항목 0~4개만 넣는다.",
+    "배열 항목은 각각 한 문장 조각으로 짧게 쓴다. 모르는 항목은 빈 배열 또는 빈 문자열을 사용한다.",
     "스키마:",
     JSON.stringify(
       {
         reply: "나무꾼의 다음 응답",
         goalText: isRupture ? RASHOMON_RUPTURE_GOAL : RASHOMON_NORMAL_GOAL,
-        memorySummary: "대화와 추론을 1200자 이하로 갱신한 요약",
+        memorySummary: "대화와 추론을 700자 이하로 갱신한 요약",
         userTheory: "사용자가 현재 믿는 사건 해석",
         userBeliefs: ["사용자가 믿는 주장"],
         userSuspicions: ["사용자가 의심하는 인물 또는 진술"],

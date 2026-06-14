@@ -1873,7 +1873,7 @@
         }
         return [
           "숲에서 무엇을 보셨나요?",
-          "도적은 뭐라고 했나요?",
+          "산적은 뭐라고 했나요?",
           "여자는 어떤 상태였나요?",
           "왜 사람을 못 믿겠다고 했나요?"
         ];
@@ -2866,7 +2866,7 @@
           phase: state.phase,
           message: cleanMessage,
           model: config.llm.model,
-          maxOutputTokens: Number(config.llm.maxOutputTokens) || 1200,
+          maxOutputTokens: Number(config.llm.maxOutputTokens) || 3000,
           memorySummary: state.hall4.memorySummary,
           recentMessages: currentHall4Messages().slice(-8),
           rashomonMemory: rashomonMemoryPayload(),

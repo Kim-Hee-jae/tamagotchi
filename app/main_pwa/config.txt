@@ -8,7 +8,7 @@
     "model": "gpt-5-mini",
     "chatCooldownMs": 1000,
     "maxInputChars": 300,
-    "maxOutputTokens": 1200,
+    "maxOutputTokens": 3000,
     "rashomon": {
       "enabled": true,
       "maxTurns": 10,

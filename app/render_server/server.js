@@ -44,18 +44,18 @@ const RASHOMON_RESPONSE_SCHEMA = {
     "shouldEnd"
   ],
   properties: {
-    reply: { type: "string" },
-    goalText: { type: "string" },
-    memorySummary: { type: "string" },
-    userTheory: { type: "string" },
-    userBeliefs: { type: "array", items: { type: "string" } },
-    userSuspicions: { type: "array", items: { type: "string" } },
-    sharedClues: { type: "array", items: { type: "string" } },
-    pressurePoints: { type: "array", items: { type: "string" } },
-    woodcutterAdmissions: { type: "array", items: { type: "string" } },
-    woodcutterEvasions: { type: "array", items: { type: "string" } },
-    distortionCandidates: { type: "array", items: { type: "string" } },
-    distortionPlan: { type: "array", items: { type: "string" } },
+    reply: { type: "string", maxLength: 420 },
+    goalText: { type: "string", maxLength: 120 },
+    memorySummary: { type: "string", maxLength: 700 },
+    userTheory: { type: "string", maxLength: 260 },
+    userBeliefs: { type: "array", maxItems: 4, items: { type: "string", maxLength: 90 } },
+    userSuspicions: { type: "array", maxItems: 4, items: { type: "string", maxLength: 90 } },
+    sharedClues: { type: "array", maxItems: 5, items: { type: "string", maxLength: 90 } },
+    pressurePoints: { type: "array", maxItems: 4, items: { type: "string", maxLength: 90 } },
+    woodcutterAdmissions: { type: "array", maxItems: 4, items: { type: "string", maxLength: 90 } },
+    woodcutterEvasions: { type: "array", maxItems: 4, items: { type: "string", maxLength: 90 } },
+    distortionCandidates: { type: "array", maxItems: 4, items: { type: "string", maxLength: 90 } },
+    distortionPlan: { type: "array", maxItems: 4, items: { type: "string", maxLength: 90 } },
     shouldSuggestTheory: { type: "boolean" },
     shouldEnd: { type: "boolean" }
   }
@@ -161,8 +161,8 @@ app.post("/api/rashomon/chat", async (req, res) => {
   const maxTurns = clampNumber(body.maxTurns, 1, 50) || 10;
   const requestedMaxOutputTokens = Number(body.maxOutputTokens);
   const maxOutputTokens = Number.isFinite(requestedMaxOutputTokens)
-    ? clampNumber(requestedMaxOutputTokens, 700, 2000)
-    : 1200;
+    ? clampNumber(requestedMaxOutputTokens, 1600, 4000)
+    : 3000;
 
   if (!message) {
     return res.status(400).json(makeRashomonFallback({
@@ -388,6 +388,7 @@ async function generateRashomonReply({
         instructions,
         input,
         max_output_tokens: maxOutputTokens,
+        reasoning: { effort: "minimal" },
         text: {
           format: {
             type: "json_schema",
