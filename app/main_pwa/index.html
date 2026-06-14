@@ -2866,7 +2866,7 @@
           phase: state.phase,
           message: cleanMessage,
           model: config.llm.model,
-          maxOutputTokens: Number(config.llm.maxOutputTokens) || 220,
+          maxOutputTokens: Number(config.llm.maxOutputTokens) || 1200,
           memorySummary: state.hall4.memorySummary,
           recentMessages: currentHall4Messages().slice(-8),
           rashomonMemory: rashomonMemoryPayload(),
@@ -2882,8 +2882,14 @@
           });
           if (!res.ok) throw new Error(`Rashomon API HTTP ${res.status}`);
           const data = await res.json();
-          currentHall4Messages().push({ role: "assistant", text: data.reply || rashomonFallbackReply() });
-          applyRashomonResponse(data);
+          if (data.fallback === true) {
+            console.warn("Rashomon fallback response", data);
+            const debugTag = data.fallbackType ? `\n[debug: ${data.fallbackType}]` : "\n[debug: fallback]";
+            currentHall4Messages().push({ role: "assistant", text: `${data.reply || rashomonFallbackReply()}${debugTag}` });
+          } else {
+            currentHall4Messages().push({ role: "assistant", text: data.reply || rashomonFallbackReply() });
+            applyRashomonResponse(data);
+          }
         } catch (err) {
           console.error("rashomon chat failed", err);
           currentHall4Messages().push({ role: "assistant", text: "응답 연결이 불안정합니다. 다시 시도해 주세요." });
@@ -2921,6 +2927,7 @@
 
       function applyRashomonResponse(data) {
         const source = data && typeof data === "object" ? data : {};
+        if (source.fallback === true) return;
         const rashomon = state.hall4.rashomon;
         state.hall4.memorySummary = source.memorySummary || state.hall4.memorySummary;
         rashomon.userTheory = source.userTheory || rashomon.userTheory || "";

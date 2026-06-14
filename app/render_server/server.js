@@ -24,6 +24,42 @@ const subscriptions = new Map();
 const intervals = new Map();
 const timeouts = new Map();
 const activeSessions = new Set();
+const RASHOMON_RESPONSE_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: [
+    "reply",
+    "goalText",
+    "memorySummary",
+    "userTheory",
+    "userBeliefs",
+    "userSuspicions",
+    "sharedClues",
+    "pressurePoints",
+    "woodcutterAdmissions",
+    "woodcutterEvasions",
+    "distortionCandidates",
+    "distortionPlan",
+    "shouldSuggestTheory",
+    "shouldEnd"
+  ],
+  properties: {
+    reply: { type: "string" },
+    goalText: { type: "string" },
+    memorySummary: { type: "string" },
+    userTheory: { type: "string" },
+    userBeliefs: { type: "array", items: { type: "string" } },
+    userSuspicions: { type: "array", items: { type: "string" } },
+    sharedClues: { type: "array", items: { type: "string" } },
+    pressurePoints: { type: "array", items: { type: "string" } },
+    woodcutterAdmissions: { type: "array", items: { type: "string" } },
+    woodcutterEvasions: { type: "array", items: { type: "string" } },
+    distortionCandidates: { type: "array", items: { type: "string" } },
+    distortionPlan: { type: "array", items: { type: "string" } },
+    shouldSuggestTheory: { type: "boolean" },
+    shouldEnd: { type: "boolean" }
+  }
+};
 const corsOptions = {
   origin(origin, callback) {
     if (isAllowedOrigin(origin)) return callback(null, true);
@@ -123,7 +159,10 @@ app.post("/api/rashomon/chat", async (req, res) => {
   const rashomonMemory = sanitizeRashomonMemory(body.rashomonMemory);
   const turnCount = clampNumber(body.turnCount, 0, 50);
   const maxTurns = clampNumber(body.maxTurns, 1, 50) || 10;
-  const maxOutputTokens = clampNumber(body.maxOutputTokens, 220, 800) || 420;
+  const requestedMaxOutputTokens = Number(body.maxOutputTokens);
+  const maxOutputTokens = Number.isFinite(requestedMaxOutputTokens)
+    ? clampNumber(requestedMaxOutputTokens, 700, 2000)
+    : 1200;
 
   if (!message) {
     return res.status(400).json(makeRashomonFallback({
@@ -132,6 +171,8 @@ app.post("/api/rashomon/chat", async (req, res) => {
       rashomonMemory,
       turnCount,
       maxTurns,
+      fallbackType: "validationError",
+      errorHint: "message is empty",
       replyOverride: "조금만 더 분명히 물어봐 주시겠습니까. 숲의 일은 말이 흐려지기 쉽습니다."
     }));
   }
@@ -143,6 +184,8 @@ app.post("/api/rashomon/chat", async (req, res) => {
       rashomonMemory,
       turnCount,
       maxTurns,
+      fallbackType: "validationError",
+      errorHint: "active session already processing",
       replyOverride: "잠시만요. 방금 물은 말을 아직 되짚고 있습니다."
     }));
   }
@@ -163,13 +206,15 @@ app.post("/api/rashomon/chat", async (req, res) => {
     });
     res.json(result);
   } catch (err) {
-    console.warn("[rashomon fallback]", err.message);
+    console.warn("[rashomon fallback: unknown]", safeErrorHint(err));
     res.json(makeRashomonFallback({
       phase,
       memorySummary,
       rashomonMemory,
       turnCount,
-      maxTurns
+      maxTurns,
+      fallbackType: "unknown",
+      errorHint: safeErrorHint(err)
     }));
   } finally {
     activeSessions.delete(sessionKey);
@@ -318,7 +363,8 @@ async function generateRashomonReply({
       rashomonMemory,
       turnCount,
       maxTurns,
-      fallbackType: "missingKey"
+      fallbackType: "openaiError",
+      errorHint: "OpenAI API key is not configured"
     });
   }
 
@@ -331,33 +377,129 @@ async function generateRashomonReply({
     maxTurns
   });
   const input = buildRashomonUserInput({ phase, message, recentMessages });
-  const temperature = phase === "rupture" ? 0.65 : 0.75;
   let rawText = "";
+  let responseStatus = "";
+  let incompleteReason = "";
 
-  if (client.responses?.create) {
-    const response = await client.responses.create({
-      model,
-      instructions,
-      input,
-      max_output_tokens: maxOutputTokens,
-      temperature
+  try {
+    if (client.responses?.create) {
+      const response = await client.responses.create({
+        model,
+        instructions,
+        input,
+        max_output_tokens: maxOutputTokens,
+        text: {
+          format: {
+            type: "json_schema",
+            name: "rashomon_response",
+            strict: true,
+            schema: RASHOMON_RESPONSE_SCHEMA
+          }
+        }
+      });
+      responseStatus = cleanText(response.status, 80);
+      incompleteReason = cleanText(response.incomplete_details?.reason, 120);
+      if (responseStatus === "incomplete") {
+        console.warn("[rashomon fallback: incomplete]", incompleteReason || "response status incomplete");
+        return makeRashomonFallback({
+          phase,
+          memorySummary,
+          rashomonMemory,
+          turnCount,
+          maxTurns,
+          fallbackType: "incomplete",
+          errorHint: incompleteReason || "OpenAI response status was incomplete"
+        });
+      }
+      rawText = response.output_text || extractResponsesText(response);
+    } else {
+      const response = await client.chat.completions.create({
+        model,
+        messages: [
+          { role: "system", content: instructions },
+          { role: "user", content: input }
+        ],
+        max_tokens: maxOutputTokens,
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "rashomon_response",
+            strict: true,
+            schema: RASHOMON_RESPONSE_SCHEMA
+          }
+        }
+      });
+      rawText = response.choices?.[0]?.message?.content || "";
+      const finishReason = cleanText(response.choices?.[0]?.finish_reason, 80);
+      if (finishReason === "length") {
+        console.warn("[rashomon fallback: incomplete]", "chat completion finish_reason=length");
+        return makeRashomonFallback({
+          phase,
+          memorySummary,
+          rashomonMemory,
+          turnCount,
+          maxTurns,
+          fallbackType: "incomplete",
+          errorHint: "OpenAI chat completion stopped because of length"
+        });
+      }
+    }
+  } catch (err) {
+    const errorHint = safeErrorHint(err);
+    console.warn("[rashomon fallback: openaiError]", errorHint);
+    return makeRashomonFallback({
+      phase,
+      memorySummary,
+      rashomonMemory,
+      turnCount,
+      maxTurns,
+      fallbackType: "openaiError",
+      errorHint
     });
-    rawText = response.output_text || extractResponsesText(response);
-  } else {
-    const response = await client.chat.completions.create({
-      model,
-      messages: [
-        { role: "system", content: instructions },
-        { role: "user", content: input }
-      ],
-      max_tokens: maxOutputTokens,
-      temperature,
-      response_format: { type: "json_object" }
+  }
+
+  if (!rawText) {
+    console.warn("[rashomon fallback: noText]", `status=${responseStatus || "unknown"}`);
+    return makeRashomonFallback({
+      phase,
+      memorySummary,
+      rashomonMemory,
+      turnCount,
+      maxTurns,
+      fallbackType: "noText",
+      errorHint: `OpenAI returned empty text. status=${responseStatus || "unknown"}`
     });
-    rawText = response.choices?.[0]?.message?.content || "";
   }
 
   const parsed = parseJsonObject(rawText);
+  if (!parsed) {
+    const errorHint = `rawText length=${rawText.length}; sample=${rawText.slice(0, 300)}`;
+    console.warn("[rashomon fallback: parseError]", errorHint);
+    return makeRashomonFallback({
+      phase,
+      memorySummary,
+      rashomonMemory,
+      turnCount,
+      maxTurns,
+      fallbackType: "parseError",
+      errorHint
+    });
+  }
+
+  const validationError = validateRashomonResponse(parsed);
+  if (validationError) {
+    console.warn("[rashomon fallback: validationError]", validationError);
+    return makeRashomonFallback({
+      phase,
+      memorySummary,
+      rashomonMemory,
+      turnCount,
+      maxTurns,
+      fallbackType: "validationError",
+      errorHint: validationError
+    });
+  }
+
   return normalizeRashomonResult(parsed, {
     phase,
     memorySummary,
@@ -391,6 +533,9 @@ function normalizeRashomonResult(value, context) {
     result.reply = RASHOMON_FALLBACKS.ending;
   }
 
+  result.fallback = false;
+  result.fallbackType = "";
+  result.errorHint = "";
   return result;
 }
 
@@ -401,16 +546,20 @@ function makeRashomonFallback({
   turnCount,
   maxTurns,
   fallbackType,
+  errorHint,
   replyOverride
 }) {
   const isRupture = phase === "rupture";
   const shouldEnd = !isRupture && turnCount >= maxTurns;
   let reply = isRupture ? RASHOMON_FALLBACKS.rupture : RASHOMON_FALLBACKS.normal;
-  if (fallbackType === "missingKey") reply = RASHOMON_FALLBACKS.missingKey;
-  if (shouldEnd && fallbackType !== "missingKey") reply = RASHOMON_FALLBACKS.ending;
+  if (fallbackType === "openaiError" && errorHint === "OpenAI API key is not configured") reply = RASHOMON_FALLBACKS.missingKey;
+  if (shouldEnd && !(fallbackType === "openaiError" && errorHint === "OpenAI API key is not configured")) reply = RASHOMON_FALLBACKS.ending;
   if (replyOverride) reply = replyOverride;
 
   return {
+    fallback: true,
+    fallbackType: cleanText(fallbackType || "unknown", 40),
+    errorHint: cleanText(errorHint || "", 500),
     reply,
     goalText: isRupture ? RASHOMON_RUPTURE_GOAL : RASHOMON_NORMAL_GOAL,
     memorySummary: cleanText(memorySummary, 1200),
@@ -442,6 +591,36 @@ function parseJsonObject(value) {
       return null;
     }
   }
+}
+
+function validateRashomonResponse(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return "response is not an object";
+  const allowedFields = new Set(Object.keys(RASHOMON_RESPONSE_SCHEMA.properties));
+  for (const field of Object.keys(value)) {
+    if (!allowedFields.has(field)) return `unexpected field: ${field}`;
+  }
+  for (const field of RASHOMON_RESPONSE_SCHEMA.required) {
+    if (!(field in value)) return `missing required field: ${field}`;
+  }
+  for (const [field, schema] of Object.entries(RASHOMON_RESPONSE_SCHEMA.properties)) {
+    const current = value[field];
+    if (schema.type === "string" && typeof current !== "string") return `field ${field} must be string`;
+    if (schema.type === "boolean" && typeof current !== "boolean") return `field ${field} must be boolean`;
+    if (schema.type === "array" && (!Array.isArray(current) || current.some((item) => typeof item !== "string"))) {
+      return `field ${field} must be string array`;
+    }
+  }
+  return "";
+}
+
+function safeErrorHint(err) {
+  if (!err) return "";
+  const parts = [];
+  if (err.status) parts.push(`status=${err.status}`);
+  if (err.code) parts.push(`code=${cleanText(err.code, 80)}`);
+  if (err.type) parts.push(`type=${cleanText(err.type, 80)}`);
+  if (err.message) parts.push(`message=${cleanText(err.message, 260)}`);
+  return parts.join("; ") || cleanText(String(err), 260);
 }
 
 function sanitizeRashomonRecentMessages(value) {
